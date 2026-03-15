@@ -1,0 +1,43 @@
+{
+  "type": "object",
+  "properties": {
+    "gpu_enabled": {
+      "type": "boolean",
+      "description": "Enable GPU acceleration",
+      "default": "false"
+    },
+    "host": {
+      "type": "string",
+      "description": "Host address to bind the server",
+      "default": "0.0.0.0"
+    },
+    "log_level": {
+      "type": "string",
+      "description": "Log level (debug, info, warn, error)",
+      "default": "info",
+      "enum": [
+        "debug",
+        "info",
+        "warn",
+        "error"
+      ]
+    },
+    "max_batch_size": {
+      "type": "integer",
+      "description": "Maximum batch size for inference requests",
+      "default": "32"
+    },
+    "model_path": {
+      "type": "string",
+      "description": "Path to the ML model files"
+    },
+    "port": {
+      "type": "integer",
+      "description": "Port to listen on",
+      "default": "8081"
+    }
+  },
+  "required": [
+    "model_path"
+  ]
+}

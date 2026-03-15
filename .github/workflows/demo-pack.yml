@@ -1,0 +1,42 @@
+name: "Demo: Pack Contract Bundles"
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pack:
+    name: Package All Contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: trianalab/pacto-actions@v1
+        with:
+          command: setup
+
+      - name: Pack all contracts
+        run: |
+          mkdir -p dist
+          {
+            echo "## Contract Bundles"
+            echo ""
+            echo "| Service | Bundle | Size |"
+            echo "|---------|--------|------|"
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+          for svc in runtime inference api; do
+            pacto pack "services/${svc}/pacto" -o "dist/${svc}.tar.gz"
+            SIZE=$(du -h "dist/${svc}.tar.gz" | cut -f1 | xargs)
+            echo "| \`${svc}\` | \`${svc}.tar.gz\` | ${SIZE} |" >> "${GITHUB_STEP_SUMMARY}"
+          done
+
+      - name: Upload bundles
+        uses: actions/upload-artifact@v4
+        with:
+          name: pacto-bundles
+          path: dist/*.tar.gz

@@ -1,0 +1,41 @@
+name: "Demo: Contract Documentation"
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  documentation:
+    name: Generate Contract Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: trianalab/pacto-actions@v1
+        with:
+          command: setup
+
+      - name: Generate runtime documentation
+        uses: trianalab/pacto-actions@v1
+        with:
+          command: doc
+          path: services/runtime/pacto
+          add-to-summary: "true"
+
+      - name: Generate inference documentation
+        uses: trianalab/pacto-actions@v1
+        with:
+          command: doc
+          path: services/inference/pacto
+          add-to-summary: "true"
+
+      - name: Generate api documentation
+        uses: trianalab/pacto-actions@v1
+        with:
+          command: doc
+          path: services/api/pacto
+          add-to-summary: "true"

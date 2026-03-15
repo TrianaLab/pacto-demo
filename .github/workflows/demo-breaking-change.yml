@@ -1,0 +1,67 @@
+name: "Demo: Breaking Change Detection"
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  breaking-change:
+    name: Simulate & Detect Breaking Change
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - uses: trianalab/pacto-actions@v1
+        with:
+          command: setup
+
+      # Apply multiple breaking changes to a copy of the runtime contract
+      - name: Create modified contract
+        run: |
+          cp -r services/runtime/pacto /tmp/runtime-modified
+          go run scripts/apply-breaking-changes.go /tmp/runtime-modified
+
+      # Diff the published OCI artifact against the modified contract
+      - name: Detect breaking changes
+        id: diff
+        uses: trianalab/pacto-actions@v1
+        with:
+          command: diff
+          old: oci://ghcr.io/trianalab/pacto-demo/runtime
+          new: /tmp/runtime-modified
+          output-format: markdown
+          fail-on-breaking: "false"
+
+      - name: Write summary
+        env:
+          HAS_BREAKING: ${{ steps.diff.outputs.has-breaking-changes }}
+        run: |
+          {
+            echo "## Breaking Change Detection Demo"
+            echo ""
+            echo "This workflow applies multiple breaking changes to the \`runtime\` contract"
+            echo "and diffs the modified version against the published OCI artifact at"
+            echo "\`oci://ghcr.io/trianalab/pacto-demo/runtime\`."
+            echo ""
+            echo "**Changes applied:**"
+            echo "1. Bumped version from 1.0.0 to 2.0.0"
+            echo "2. Changed HTTP port from 8081 to 9090"
+            echo "3. Removed \`POST /predict\` endpoint from OpenAPI spec"
+            echo "4. Removed \`model_path\` config property from JSON Schema"
+            echo ""
+            if [ "${HAS_BREAKING}" = "true" ]; then
+              echo "**Result: Breaking changes detected.**"
+            else
+              echo "**Result: No breaking changes.**"
+            fi
+            echo ""
+            echo "In a real CI pipeline, this would block the pull request."
+          } >> "${GITHUB_STEP_SUMMARY}"

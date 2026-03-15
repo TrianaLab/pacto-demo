@@ -1,0 +1,46 @@
+pactoVersion: "1.0"
+
+service:
+  name: inference
+  version: 1.0.0
+  owner: team/ml
+  image:
+    ref: ghcr.io/trianalab/pacto-demo/inference:1.0.0
+
+interfaces:
+  - name: http
+    type: http
+    port: 8082
+    visibility: internal
+    contract: interfaces/openapi.json
+
+configuration:
+  schema: configuration/schema.json
+
+dependencies:
+  - ref: oci://ghcr.io/trianalab/pacto-demo/runtime
+    required: true
+    compatibility: "^1.0.0"
+
+runtime:
+  workload: service
+  state:
+    type: stateless
+    persistence:
+      scope: local
+      durability: ephemeral
+    dataCriticality: low
+  lifecycle:
+    upgradeStrategy: rolling
+    gracefulShutdownSeconds: 15
+  health:
+    interface: http
+    path: /health
+
+scaling:
+  min: 1
+  max: 3
+
+metadata:
+  tier: ml
+  team: ml

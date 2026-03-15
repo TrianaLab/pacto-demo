@@ -1,0 +1,135 @@
+name: Pacto CI
+
+on:
+  pull_request:
+    paths:
+      - "services/*/pacto/**"
+  push:
+    branches: [main]
+    paths:
+      - "services/*/pacto/**"
+
+permissions:
+  contents: read
+  packages: write
+  pull-requests: write
+
+jobs:
+  pacto:
+    name: Pacto CI
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: trianalab/pacto-actions@v1
+        with:
+          command: setup
+
+      # ── Validate ──────────────────────────────────────
+      - name: Validate runtime contract
+        uses: trianalab/pacto-actions@v1
+        with:
+          command: validate
+          path: services/runtime/pacto
+
+      - name: Validate inference contract
+        uses: trianalab/pacto-actions@v1
+        with:
+          command: validate
+          path: services/inference/pacto
+
+      - name: Validate api contract
+        uses: trianalab/pacto-actions@v1
+        with:
+          command: validate
+          path: services/api/pacto
+
+      # ── Diff (PRs only) ──────────────────────────────
+      - name: Diff runtime contract
+        if: github.event_name == 'pull_request'
+        uses: trianalab/pacto-actions@v1
+        with:
+          command: diff
+          old: oci://ghcr.io/trianalab/pacto-demo/runtime
+          new: services/runtime/pacto
+          output-format: markdown
+          comment-on-pr: "true"
+          fail-on-breaking: "true"
+
+      - name: Diff inference contract
+        if: github.event_name == 'pull_request'
+        uses: trianalab/pacto-actions@v1
+        with:
+          command: diff
+          old: oci://ghcr.io/trianalab/pacto-demo/inference
+          new: services/inference/pacto
+          output-format: markdown
+          comment-on-pr: "true"
+          fail-on-breaking: "true"
+
+      - name: Diff api contract
+        if: github.event_name == 'pull_request'
+        uses: trianalab/pacto-actions@v1
+        with:
+          command: diff
+          old: oci://ghcr.io/trianalab/pacto-demo/api
+          new: services/api/pacto
+          output-format: markdown
+          comment-on-pr: "true"
+          fail-on-breaking: "true"
+
+      # ── Documentation ────────────────────────────────
+      - name: Generate runtime documentation
+        uses: trianalab/pacto-actions@v1
+        with:
+          command: doc
+          path: services/runtime/pacto
+          add-to-summary: "true"
+
+      - name: Generate inference documentation
+        uses: trianalab/pacto-actions@v1
+        with:
+          command: doc
+          path: services/inference/pacto
+          add-to-summary: "true"
+
+      - name: Generate api documentation
+        uses: trianalab/pacto-actions@v1
+        with:
+          command: doc
+          path: services/api/pacto
+          add-to-summary: "true"
+
+      # ── Push (main only, in dependency order) ────────
+      - name: Push runtime contract
+        if: github.event_name == 'push'
+        uses: trianalab/pacto-actions@v1
+        with:
+          command: push
+          path: services/runtime/pacto
+          ref: oci://ghcr.io/trianalab/pacto-demo/runtime
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push inference contract
+        if: github.event_name == 'push'
+        uses: trianalab/pacto-actions@v1
+        with:
+          command: push
+          path: services/inference/pacto
+          ref: oci://ghcr.io/trianalab/pacto-demo/inference
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push api contract
+        if: github.event_name == 'push'
+        uses: trianalab/pacto-actions@v1
+        with:
+          command: push
+          path: services/api/pacto
+          ref: oci://ghcr.io/trianalab/pacto-demo/api
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}

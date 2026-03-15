@@ -1,0 +1,45 @@
+name: "Demo: Dependency Graph"
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-graph:
+    name: Resolve Dependency Graph
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: trianalab/pacto-actions@v1
+        with:
+          command: setup
+
+      - name: Generate dependency graph
+        run: |
+          {
+            echo "## Dependency Graph"
+            echo ""
+            echo "Resolved from the top-level \`api\` service:"
+            echo ""
+            echo '```'
+            pacto graph services/api/pacto
+            echo '```'
+            echo ""
+            echo "---"
+            echo ""
+            echo "### Per-service graphs"
+            echo ""
+            for svc in runtime inference api; do
+              echo "#### ${svc}"
+              echo ""
+              echo '```'
+              pacto graph "services/${svc}/pacto"
+              echo '```'
+              echo ""
+            done
+          } >> "${GITHUB_STEP_SUMMARY}"

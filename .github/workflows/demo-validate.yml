@@ -1,0 +1,55 @@
+name: "Demo: Validate & Explain"
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-and-explain:
+    name: Validate & Explain All Contracts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: trianalab/pacto-actions@v1
+        with:
+          command: setup
+
+      # ── Validate ──────────────────────────────────────
+      - name: Validate runtime
+        uses: trianalab/pacto-actions@v1
+        with:
+          command: validate
+          path: services/runtime/pacto
+
+      - name: Validate inference
+        uses: trianalab/pacto-actions@v1
+        with:
+          command: validate
+          path: services/inference/pacto
+
+      - name: Validate api
+        uses: trianalab/pacto-actions@v1
+        with:
+          command: validate
+          path: services/api/pacto
+
+      # ── Explain ───────────────────────────────────────
+      - name: Explain all contracts
+        run: |
+          {
+            echo "## Contract Summaries"
+            echo ""
+            for svc in runtime inference api; do
+              echo "### ${svc}"
+              echo ""
+              echo '```'
+              pacto explain "services/${svc}/pacto"
+              echo '```'
+              echo ""
+            done
+          } >> "${GITHUB_STEP_SUMMARY}"

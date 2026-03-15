@@ -1,0 +1,48 @@
+{
+  "type": "object",
+  "properties": {
+    "api_key": {
+      "type": "string",
+      "description": "API key for authentication"
+    },
+    "cors_origins": {
+      "type": "string",
+      "description": "Allowed CORS origins",
+      "default": "*"
+    },
+    "host": {
+      "type": "string",
+      "description": "Host address to bind the server",
+      "default": "0.0.0.0"
+    },
+    "inference_url": {
+      "type": "string",
+      "description": "URL of the inference service"
+    },
+    "log_level": {
+      "type": "string",
+      "description": "Log level (debug, info, warn, error)",
+      "default": "info",
+      "enum": [
+        "debug",
+        "info",
+        "warn",
+        "error"
+      ]
+    },
+    "port": {
+      "type": "integer",
+      "description": "Port to listen on",
+      "default": "8080"
+    },
+    "rate_limit_rps": {
+      "type": "integer",
+      "description": "Rate limit in requests per second",
+      "default": "100"
+    }
+  },
+  "required": [
+    "inference_url",
+    "api_key"
+  ]
+}
