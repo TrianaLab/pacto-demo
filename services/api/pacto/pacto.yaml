@@ -15,7 +15,7 @@ interfaces:
     contract: interfaces/openapi.json
 
 configuration:
-  schema: configuration/schema.json
+  schema: config.schema.json
 
 dependencies:
   - ref: oci://ghcr.io/trianalab/pacto-demo/inference

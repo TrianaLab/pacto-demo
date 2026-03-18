@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "api_key": {
+      "type": "string"
+    },
+    "cors_origins": {
+      "type": "string"
+    },
+    "host": {
+      "type": "string"
+    },
+    "inference_url": {
+      "type": "string"
+    },
+    "log_level": {
+      "type": "string"
+    },
+    "port": {
+      "type": "integer"
+    },
+    "rate_limit_rps": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "api_key",
+    "cors_origins",
+    "host",
+    "inference_url",
+    "log_level",
+    "port",
+    "rate_limit_rps"
+  ],
+  "title": "configuration",
+  "type": "object"
+}

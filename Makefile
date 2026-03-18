@@ -3,11 +3,17 @@ REGISTRY := ghcr.io/trianalab/pacto-demo
 
 .PHONY: generate build validate explain graph doc pack push diff breaking-change clean
 
-## ── Code Generation ─────────────────────────────────────
+## -- Code Generation -------------------------------------------
 
-# Generate OpenAPI specs and JSON Schema config files from Go source code
+# Generate JSON Schema and OpenAPI specs using Pacto plugins
 generate:
-	@go run scripts/generate.go
+	@for svc in $(SERVICES); do \
+		echo "==> Generating schemas for $$svc..."; \
+		pacto generate schema-infer services/$$svc/pacto --option file=config.yaml -o services/$$svc/pacto; \
+		ln -sf pacto/pacto.yaml services/$$svc/pacto.yaml; \
+		pacto generate openapi-infer services/$$svc --option framework=huma --option output=interfaces/openapi.json -o services/$$svc/pacto; \
+		rm -f services/$$svc/pacto.yaml; \
+	done
 
 # Build all service binaries
 build:
@@ -15,7 +21,7 @@ build:
 		go build -o bin/$$svc ./services/$$svc/cmd/...; \
 	done
 
-## ── Pacto Commands ──────────────────────────────────────
+## -- Pacto Commands --------------------------------------------
 
 # Validate every contract against the Pacto specification
 validate:
@@ -59,13 +65,13 @@ push:
 diff:
 	@pacto diff $(OLD) $(NEW)
 
-## ── Demo ────────────────────────────────────────────────
+## -- Demo ------------------------------------------------------
 
 # Simulate a breaking change and run pacto diff to detect it
 breaking-change:
 	@bash scripts/breaking-change.sh
 
-## ── Housekeeping ────────────────────────────────────────
+## -- Housekeeping ----------------------------------------------
 
 clean:
 	@rm -rf bin/ dist/

@@ -59,14 +59,14 @@ func main() {
 	}
 
 	// 3. Remove model_path from config schema
-	schemaFile := filepath.Join(dir, "configuration", "schema.json")
+	schemaFile := filepath.Join(dir, "config.schema.json")
 	schemaData, err := os.ReadFile(schemaFile)
 	if err != nil {
-		log.Fatalf("Failed to read schema.json: %v", err)
+		log.Fatalf("Failed to read config.schema.json: %v", err)
 	}
 	var schema map[string]any
 	if err := json.Unmarshal(schemaData, &schema); err != nil {
-		log.Fatalf("Failed to parse schema.json: %v", err)
+		log.Fatalf("Failed to parse config.schema.json: %v", err)
 	}
 	if props, ok := schema["properties"].(map[string]any); ok {
 		delete(props, "model_path")
@@ -86,9 +86,9 @@ func main() {
 	}
 	schemaOut, err := json.MarshalIndent(schema, "", "  ")
 	if err != nil {
-		log.Fatalf("Failed to marshal schema.json: %v", err)
+		log.Fatalf("Failed to marshal config.schema.json: %v", err)
 	}
 	if err := os.WriteFile(schemaFile, schemaOut, 0o644); err != nil {
-		log.Fatalf("Failed to write schema.json: %v", err)
+		log.Fatalf("Failed to write config.schema.json: %v", err)
 	}
 }
