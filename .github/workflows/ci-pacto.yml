@@ -3,11 +3,11 @@ name: Pacto CI
 on:
   pull_request:
     paths:
-      - "services/*/pacto/**"
+      - "services/**"
   push:
     branches: [main]
     paths:
-      - "services/*/pacto/**"
+      - "services/**"
 
 permissions:
   contents: read
@@ -24,6 +24,16 @@ jobs:
       - uses: trianalab/pacto-actions@v1
         with:
           command: setup
+
+      # ── Generate schemas using plugins ─────────────────
+      - name: Generate schemas
+        run: |
+          for svc in runtime inference api; do
+            pacto generate schema-infer services/$svc/pacto --option file=config.yaml -o services/$svc/pacto
+            ln -sf pacto/pacto.yaml services/$svc/pacto.yaml
+            pacto generate openapi-infer services/$svc --option framework=huma --option output=interfaces/openapi.json -o services/$svc/pacto
+            rm -f services/$svc/pacto.yaml
+          done
 
       # ── Validate ──────────────────────────────────────
       - name: Validate runtime contract
