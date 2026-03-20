@@ -10,33 +10,27 @@ permissions:
 
 jobs:
   breaking-change:
-    name: Simulate & Detect Breaking Change
+    name: Detect Breaking Changes (with overrides)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "1.23"
 
       - uses: trianalab/pacto-actions@v1
         with:
           command: setup
 
-      # Apply multiple breaking changes to a copy of the runtime contract
-      - name: Create modified contract
-        run: |
-          cp -r services/runtime/pacto /tmp/runtime-modified
-          go run scripts/apply-breaking-changes.go /tmp/runtime-modified
-
-      # Diff the published OCI artifact against the modified contract
+      # Diff the published OCI artifact against the local contract with overrides
       - name: Detect breaking changes
         id: diff
         uses: trianalab/pacto-actions@v1
         with:
           command: diff
           old: oci://ghcr.io/trianalab/pacto-demo/runtime
-          new: /tmp/runtime-modified
+          new: services/runtime/pacto
+          new-set: |
+            service.version=2.0.0
+            service.image.ref=ghcr.io/trianalab/pacto-demo/runtime:2.0.0
+            interfaces[0].port=9090
           output-format: markdown
           fail-on-breaking: "false"
 
@@ -47,15 +41,14 @@ jobs:
           {
             echo "## Breaking Change Detection Demo"
             echo ""
-            echo "This workflow applies multiple breaking changes to the \`runtime\` contract"
-            echo "and diffs the modified version against the published OCI artifact at"
-            echo "\`oci://ghcr.io/trianalab/pacto-demo/runtime\`."
+            echo "This workflow uses \`--new-set\` overrides to simulate breaking changes"
+            echo "on the \`runtime\` contract and diffs the result against the published"
+            echo "OCI artifact at \`oci://ghcr.io/trianalab/pacto-demo/runtime\`."
             echo ""
-            echo "**Changes applied:**"
-            echo "1. Bumped version from 1.0.0 to 2.0.0"
-            echo "2. Changed HTTP port from 8081 to 9090"
-            echo "3. Removed \`POST /predict\` endpoint from OpenAPI spec"
-            echo "4. Removed \`model_path\` config property from JSON Schema"
+            echo "**Changes simulated via overrides:**"
+            echo "1. Bumped version from 1.0.0 to 2.0.0 (\`--new-set service.version=2.0.0\`)"
+            echo "2. Updated image tag (\`--new-set service.image.ref=....:2.0.0\`)"
+            echo "3. Changed HTTP port from 8081 to 9090 (\`--new-set interfaces[0].port=9090\`)"
             echo ""
             if [ "${HAS_BREAKING}" = "true" ]; then
               echo "**Result: Breaking changes detected.**"
@@ -63,5 +56,5 @@ jobs:
               echo "**Result: No breaking changes.**"
             fi
             echo ""
-            echo "In a real CI pipeline, this would block the pull request."
+            echo "No files were copied or modified — overrides are applied at diff time."
           } >> "${GITHUB_STEP_SUMMARY}"

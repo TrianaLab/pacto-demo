@@ -8,10 +8,13 @@
 
 ## Breaking Change Detection
 
-Someone changed the runtime service — bumped the version, moved the port, removed an API endpoint, and dropped a config property. Pacto diffs the modified contract against the published OCI artifact and classifies every change:
+Pacto's override system lets you simulate contract changes inline — no need to copy or edit files. Use `--new-set` on `pacto diff` to apply hypothetical changes to the new contract and see how they would be classified:
 
 ```
-$ pacto diff oci://ghcr.io/trianalab/pacto-demo/runtime modified/
+$ pacto diff oci://ghcr.io/trianalab/pacto-demo/runtime services/runtime/pacto \
+    --new-set service.version=2.0.0 \
+    --new-set 'service.image.ref=ghcr.io/trianalab/pacto-demo/runtime:2.0.0' \
+    --new-set 'interfaces[0].port=9090'
 ```
 
 **Classification:** `BREAKING`
@@ -21,10 +24,31 @@ $ pacto diff oci://ghcr.io/trianalab/pacto-demo/runtime modified/
 | NON_BREAKING | `service.version` | modified | service.version modified | `1.0.0` | `2.0.0` |
 | NON_BREAKING | `service.image` | modified | service.image modified | `ghcr.io/trianalab/pacto-demo/runtime:1.0.0` | `ghcr.io/trianalab/pacto-demo/runtime:2.0.0` |
 | BREAKING | `interfaces.port` | modified | interfaces.port modified | `8081` | `9090` |
-| BREAKING | `openapi.paths[/predict]` | removed | API path /predict removed | `/predict` |  |
-| BREAKING | `schema.properties[model_path]` | removed | configuration property model_path removed | `model_path` |  |
 
-Port changes, removed endpoints, removed config properties — all caught before merging.
+Port changes are caught as breaking. Version and image updates are non-breaking. All detected without modifying a single file.
+
+You can also use `--new-values` to load overrides from a file:
+
+```yaml
+# overrides/breaking-changes.yaml
+service:
+  version: "2.0.0"
+  image:
+    ref: ghcr.io/trianalab/pacto-demo/runtime:2.0.0
+interfaces:
+  - name: http
+    type: http
+    port: 9090
+    visibility: internal
+    contract: interfaces/openapi.json
+```
+
+```
+$ pacto diff oci://ghcr.io/trianalab/pacto-demo/runtime services/runtime/pacto \
+    --new-values overrides/breaking-changes.yaml
+```
+
+Both approaches produce the same result — choose whichever fits your workflow.
 
 ---
 
@@ -111,6 +135,26 @@ Bundles are pushed to GHCR as OCI artifacts, just like container images. Other s
 
 ---
 
+## Overrides
+
+Pacto supports overriding contract values without editing files. This is useful for environment-specific validation, CI pipelines, and what-if analysis.
+
+```bash
+# Validate with production config values
+pacto validate services/runtime/pacto --values overrides/production.yaml
+
+# Override a single field inline
+pacto validate services/runtime/pacto --set service.version=2.0.0
+
+# Diff with overrides on the new contract
+pacto diff oci://ghcr.io/trianalab/pacto-demo/runtime services/runtime/pacto \
+    --new-set 'interfaces[0].port=9090'
+```
+
+Overrides are available on all commands: `validate`, `explain`, `diff`, `doc`, and `pack`.
+
+---
+
 ## CI Integration
 
 This repository runs the full Pacto pipeline using [pacto-actions](https://github.com/trianalab/pacto-actions). Every workflow runs automatically on push to `main` — click any workflow to see the output in the job summary.
@@ -135,7 +179,7 @@ publish contract to OCI registry
 |------------|----------|----------------------|
 | Validation | [Validate & Explain](../../actions/workflows/demo-validate.yml) | `pacto validate` + `pacto explain` on every contract |
 | Dependency graph | [Dependency Graph](../../actions/workflows/demo-graph.yml) | `pacto graph` resolves the full service tree |
-| Breaking changes | [Breaking Change Detection](../../actions/workflows/demo-breaking-change.yml) | Applies 4 breaking changes, diffs against published OCI artifact |
+| Breaking changes | [Breaking Change Detection](../../actions/workflows/demo-breaking-change.yml) | Uses `--new-set` overrides to simulate breaking changes and diff against published OCI artifact |
 | Documentation | [Contract Documentation](../../actions/workflows/demo-docs.yml) | `pacto doc` generates Markdown with diagrams and tables |
 | Packaging | [Pack Contract Bundles](../../actions/workflows/demo-pack.yml) | `pacto pack` creates OCI-ready bundles |
 | Full CI | [Pacto CI](../../actions/workflows/ci-pacto.yml) | Validate, diff, document, and push to GHCR |
@@ -176,8 +220,10 @@ pacto doc services/inference/pacto
 # package a contract as an OCI bundle
 pacto pack services/runtime/pacto -o dist/runtime.tar.gz
 
-# simulate breaking changes and detect them
-./scripts/demo-breaking-change.sh
+# detect breaking changes using overrides (no file edits needed)
+pacto diff oci://ghcr.io/trianalab/pacto-demo/runtime services/runtime/pacto \
+    --new-set service.version=2.0.0 \
+    --new-set 'interfaces[0].port=9090'
 ```
 
 ---

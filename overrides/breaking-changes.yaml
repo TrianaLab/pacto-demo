@@ -1,0 +1,10 @@
+service:
+  version: "2.0.0"
+  image:
+    ref: ghcr.io/trianalab/pacto-demo/runtime:2.0.0
+interfaces:
+  - name: http
+    type: http
+    port: 9090
+    visibility: internal
+    contract: interfaces/openapi.json
