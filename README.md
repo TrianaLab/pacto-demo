@@ -1,12 +1,20 @@
 # Pacto Demo
 
-**Pacto** is a runtime contract framework for cloud-native services. It turns service contracts into machine-readable artifacts — versioned in OCI registries, validated in CI, diffed on every pull request. This repository demonstrates Pacto's capabilities on three Go services connected through a dependency chain.
+Production failures rarely happen because the code is wrong. They happen because a port changed, a required config key was missing, or a dependency upgraded and broke an assumption no one documented.
+
+**Pacto** is a runtime contract system. It captures what a service needs to run correctly — interfaces, configuration, dependencies, and runtime assumptions — in a single, machine-readable contract. That contract is versioned, published to an OCI registry, validated in CI, and diffed on every pull request.
+
+> If a service passes Pacto validation, it is safe to run in production.
+
+This repository demonstrates Pacto across three Go services connected through a dependency chain.
 
 > **[github.com/trianalab/pacto](https://github.com/trianalab/pacto)** — Install the CLI, read the docs, and learn more.
 
 ---
 
 ## Breaking Change Detection
+
+A port changes from `8081` to `9090`. In most systems, you find out when the deployment fails. With Pacto, you find out before code is merged.
 
 Pacto's override system lets you simulate contract changes inline — no need to copy or edit files. Use `--new-set` on `pacto diff` to apply hypothetical changes to the new contract and see how they would be classified:
 
@@ -52,23 +60,9 @@ Both approaches produce the same result — choose whichever fits your workflow.
 
 ---
 
-## Dependency Graph
-
-Pacto resolves OCI-based dependency trees. Each service declares its dependencies as OCI references with semver constraints, and Pacto pulls and resolves them:
-
-```
-$ pacto graph services/api/pacto
-
-api@1.0.0
-└─ inference@1.0.0
-   └─ runtime@1.0.0
-```
-
----
-
 ## The Contract
 
-A single `pacto.yaml` describes everything CI needs to know about a service:
+A single `pacto.yaml` describes everything a service needs to run correctly:
 
 ```yaml
 # services/inference/pacto/pacto.yaml
@@ -114,6 +108,45 @@ Full contract reference: [trianalab.github.io/pacto/contract-reference](https://
 
 ---
 
+## Overrides: Runtime Simulation Without File Edits
+
+Overrides let you test scenarios against contracts without modifying any files. Think of it as "what-if" analysis for your service topology.
+
+```bash
+# Validate with production config values
+pacto validate services/runtime/pacto --values overrides/production.yaml
+
+# Override a single field inline
+pacto validate services/runtime/pacto --set service.version=2.0.0
+
+# Diff with overrides on the new contract
+pacto diff oci://ghcr.io/trianalab/pacto-demo/runtime services/runtime/pacto \
+    --new-set 'interfaces[0].port=9090'
+```
+
+Use cases:
+- Simulate a version bump and check for breaking changes before committing
+- Validate a contract against production-specific configuration
+- Test dependency compatibility with a hypothetical upgrade
+
+Overrides are available on all commands: `validate`, `explain`, `diff`, `doc`, and `pack`.
+
+---
+
+## Dependency Graph
+
+Pacto resolves OCI-based dependency trees. Each service declares its dependencies as OCI references with semver constraints, and Pacto pulls and resolves them:
+
+```
+$ pacto graph services/api/pacto
+
+api@1.0.0
+└─ inference@1.0.0
+   └─ runtime@1.0.0
+```
+
+---
+
 ## Contract Bundle
 
 Each service produces a self-contained bundle that gets packed and pushed to an OCI registry:
@@ -132,26 +165,6 @@ Packed runtime@1.0.0 -> dist/runtime.tar.gz
 ```
 
 Bundles are pushed to GHCR as OCI artifacts, just like container images. Other services reference them by OCI URI (`oci://ghcr.io/trianalab/pacto-demo/runtime`), and Pacto pulls and resolves them automatically.
-
----
-
-## Overrides
-
-Pacto supports overriding contract values without editing files. This is useful for environment-specific validation, CI pipelines, and what-if analysis.
-
-```bash
-# Validate with production config values
-pacto validate services/runtime/pacto --values overrides/production.yaml
-
-# Override a single field inline
-pacto validate services/runtime/pacto --set service.version=2.0.0
-
-# Diff with overrides on the new contract
-pacto diff oci://ghcr.io/trianalab/pacto-demo/runtime services/runtime/pacto \
-    --new-set 'interfaces[0].port=9090'
-```
-
-Overrides are available on all commands: `validate`, `explain`, `diff`, `doc`, and `pack`.
 
 ---
 
