@@ -4,11 +4,35 @@ Production failures rarely happen because the code is wrong. They happen because
 
 **Pacto** is a runtime contract system. It captures what a service needs to run correctly — interfaces, configuration, dependencies, and runtime assumptions — in a single, machine-readable contract. That contract is versioned, published to an OCI registry, validated in CI, and diffed on every pull request.
 
-> If a service passes Pacto validation, it is safe to run in production.
-
-This repository demonstrates Pacto across three Go services connected through a dependency chain.
+> If it passes Pacto, it won't surprise you in production.
 
 > **[github.com/trianalab/pacto](https://github.com/trianalab/pacto)** — Install the CLI, read the docs, and learn more.
+
+---
+
+## Mental Model
+
+Think of Pacto as **OpenAPI, but for the entire service** — not just the HTTP interface.
+
+- API contracts (ports, protocols, endpoints)
+- Configuration validation (schema, required values, defaults)
+- Dependency resolution (services, versions, compatibility)
+- Runtime guarantees (health, state, scaling, persistence)
+
+One contract. One validation step. One place to check before deploying.
+
+---
+
+## What Pacto Replaces
+
+Today, these checks are scattered across your stack:
+
+- **CI scripts** that validate env vars or config files
+- **Helm values validation** buried in templates
+- **Runbooks and tribal knowledge** about which services depend on what
+- **Integration tests** that catch port or protocol mismatches too late
+
+Pacto consolidates all of this into a single contract per service, validated automatically on every change.
 
 ---
 
@@ -16,7 +40,7 @@ This repository demonstrates Pacto across three Go services connected through a 
 
 A port changes from `8081` to `9090`. In most systems, you find out when the deployment fails. With Pacto, you find out before code is merged.
 
-Pacto's override system lets you simulate contract changes inline — no need to copy or edit files. Use `--new-set` on `pacto diff` to apply hypothetical changes to the new contract and see how they would be classified:
+Simulate contract changes inline — no files to copy or edit. Use `--new-set` on `pacto diff` to apply hypothetical changes and see how they would be classified:
 
 ```
 $ pacto diff oci://ghcr.io/trianalab/pacto-demo/runtime services/runtime/pacto \
@@ -60,9 +84,9 @@ Both approaches produce the same result — choose whichever fits your workflow.
 
 ---
 
-## The Contract
+## What Gets Validated
 
-A single `pacto.yaml` describes everything a service needs to run correctly:
+A single `pacto.yaml` declares the full operational surface of a service:
 
 ```yaml
 # services/inference/pacto/pacto.yaml
@@ -108,9 +132,9 @@ Full contract reference: [trianalab.github.io/pacto/contract-reference](https://
 
 ---
 
-## Overrides: Runtime Simulation Without File Edits
+## Scenario Testing with Overrides
 
-Overrides let you test scenarios against contracts without modifying any files. Think of it as "what-if" analysis for your service topology.
+Overrides let you run "what-if" simulations against contracts without touching any files. Test how a change would behave before you commit it.
 
 ```bash
 # Validate with production config values
@@ -135,7 +159,9 @@ Overrides are available on all commands: `validate`, `explain`, `diff`, `doc`, a
 
 ## Dependency Graph
 
-Pacto resolves OCI-based dependency trees. Each service declares its dependencies as OCI references with semver constraints, and Pacto pulls and resolves them:
+Services don't run in isolation. A missing or incompatible dependency is a production incident waiting to happen.
+
+Pacto resolves OCI-based dependency trees before deployment. Each service declares its dependencies as OCI references with semver constraints, and Pacto pulls, resolves, and validates compatibility across the chain:
 
 ```
 $ pacto graph services/api/pacto
@@ -144,6 +170,8 @@ api@1.0.0
 └─ inference@1.0.0
    └─ runtime@1.0.0
 ```
+
+If a dependency introduces a breaking change, `pacto diff` catches it. If a version constraint can't be satisfied, `pacto graph` fails. Both happen in CI, not in production.
 
 ---
 
@@ -170,7 +198,7 @@ Bundles are pushed to GHCR as OCI artifacts, just like container images. Other s
 
 ## CI Integration
 
-This repository runs the full Pacto pipeline using [pacto-actions](https://github.com/trianalab/pacto-actions). Every workflow runs automatically on push to `main` — click any workflow to see the output in the job summary.
+Every change is validated before it reaches production. This repository runs the full Pacto pipeline using [pacto-actions](https://github.com/trianalab/pacto-actions) — every workflow runs automatically on push to `main`.
 
 ```
 generate schemas (schema-infer + openapi-infer)
