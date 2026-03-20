@@ -43,7 +43,7 @@ A port changes from `8081` to `9090`. In most systems, you find out when the dep
 Simulate contract changes inline — no files to copy or edit. Use `--new-set` on `pacto diff` to apply hypothetical changes and see how they would be classified:
 
 ```
-$ pacto diff oci://ghcr.io/trianalab/pacto-demo/runtime services/runtime/pacto \
+$ pacto diff oci://ghcr.io/trianalab/pacto-demo/runtime oci://ghcr.io/trianalab/pacto-demo/runtime \
     --new-set service.version=2.0.0 \
     --new-set 'service.image.ref=ghcr.io/trianalab/pacto-demo/runtime:2.0.0' \
     --new-set 'interfaces[0].port=9090'
@@ -76,7 +76,7 @@ interfaces:
 ```
 
 ```
-$ pacto diff oci://ghcr.io/trianalab/pacto-demo/runtime services/runtime/pacto \
+$ pacto diff oci://ghcr.io/trianalab/pacto-demo/runtime oci://ghcr.io/trianalab/pacto-demo/runtime \
     --new-values overrides/breaking-changes.yaml
 ```
 
@@ -138,13 +138,13 @@ Overrides let you run "what-if" simulations against contracts without touching a
 
 ```bash
 # Validate with production config values
-pacto validate services/runtime/pacto --values overrides/production.yaml
+pacto validate oci://ghcr.io/trianalab/pacto-demo/runtime --values overrides/production.yaml
 
 # Override a single field inline
-pacto validate services/runtime/pacto --set service.version=2.0.0
+pacto validate oci://ghcr.io/trianalab/pacto-demo/runtime --set service.version=2.0.0
 
 # Diff with overrides on the new contract
-pacto diff oci://ghcr.io/trianalab/pacto-demo/runtime services/runtime/pacto \
+pacto diff oci://ghcr.io/trianalab/pacto-demo/runtime oci://ghcr.io/trianalab/pacto-demo/runtime \
     --new-set 'interfaces[0].port=9090'
 ```
 
@@ -164,7 +164,7 @@ Services don't run in isolation. A missing or incompatible dependency is a produ
 Pacto resolves OCI-based dependency trees before deployment. Each service declares its dependencies as OCI references with semver constraints, and Pacto pulls, resolves, and validates compatibility across the chain:
 
 ```
-$ pacto graph services/api/pacto
+$ pacto graph oci://ghcr.io/trianalab/pacto-demo/api
 
 api@1.0.0
 └─ inference@1.0.0
@@ -241,28 +241,28 @@ Three Go services built with [Huma](https://huma.rocks). Official Pacto plugins 
 
 ## Quickstart
 
-Prerequisites: [Go 1.23+](https://go.dev/dl/), [Pacto CLI](https://github.com/trianalab/pacto)
+Prerequisites: [Pacto CLI](https://github.com/trianalab/pacto)
 
 ```bash
 # validate all contracts
-pacto validate services/runtime/pacto
-pacto validate services/inference/pacto
-pacto validate services/api/pacto
+pacto validate oci://ghcr.io/trianalab/pacto-demo/runtime
+pacto validate oci://ghcr.io/trianalab/pacto-demo/inference
+pacto validate oci://ghcr.io/trianalab/pacto-demo/api
 
 # resolve the full dependency graph
-pacto graph services/api/pacto
+pacto graph oci://ghcr.io/trianalab/pacto-demo/api
 
 # inspect a contract
-pacto explain services/inference/pacto
+pacto explain oci://ghcr.io/trianalab/pacto-demo/inference
 
 # generate documentation
-pacto doc services/inference/pacto
+pacto doc oci://ghcr.io/trianalab/pacto-demo/inference
 
-# package a contract as an OCI bundle
+# package a contract as an OCI bundle (requires local clone)
 pacto pack services/runtime/pacto -o dist/runtime.tar.gz
 
 # detect breaking changes using overrides (no file edits needed)
-pacto diff oci://ghcr.io/trianalab/pacto-demo/runtime services/runtime/pacto \
+pacto diff oci://ghcr.io/trianalab/pacto-demo/runtime oci://ghcr.io/trianalab/pacto-demo/runtime \
     --new-set service.version=2.0.0 \
     --new-set 'interfaces[0].port=9090'
 ```
