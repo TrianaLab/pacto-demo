@@ -67,9 +67,13 @@ diff:
 
 ## -- Demo ------------------------------------------------------
 
-# Simulate a breaking change and run pacto diff to detect it
+# Detect breaking changes using overrides (no file edits needed)
 breaking-change:
-	@bash scripts/breaking-change.sh
+	@pacto diff oci://ghcr.io/trianalab/pacto-demo/runtime services/runtime/pacto \
+		--new-set service.version=2.0.0 \
+		--new-set 'service.image.ref=ghcr.io/trianalab/pacto-demo/runtime:2.0.0' \
+		--new-set 'interfaces[0].port=9090' \
+		--output-format markdown || true
 
 ## -- Housekeeping ----------------------------------------------
 
