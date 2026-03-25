@@ -18,9 +18,6 @@ runtime:
   lifecycle:
     upgradeStrategy: recreate
     gracefulShutdownSeconds: 60
-  health:
-    interface: tcp
-    port: 5432
 
 scaling:
   replicas: 1

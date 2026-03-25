@@ -18,9 +18,6 @@ runtime:
   lifecycle:
     upgradeStrategy: rolling
     gracefulShutdownSeconds: 30
-  health:
-    interface: tcp
-    port: 6379
 
 scaling:
   replicas: 1
