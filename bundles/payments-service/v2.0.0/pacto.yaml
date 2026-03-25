@@ -50,7 +50,7 @@ runtime:
       durability: persistent
     dataCriticality: high
   lifecycle:
-    upgradeStrategy: blue-green
+    upgradeStrategy: recreate
     gracefulShutdownSeconds: 60
   health:
     interface: http
