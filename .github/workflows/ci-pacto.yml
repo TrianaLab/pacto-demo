@@ -74,19 +74,15 @@ jobs:
 
       # ── Push (main only, leaves first, root last) ───
       - name: Push contracts to OCI registry
-        if: github.event_name == 'push'
-        env:
-          PACTO_REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: |
-          OCI_REGISTRY="ghcr.io/trianalab/pacto-demo"
-
-          pacto login ghcr.io -u ${{ github.actor }} -p "$PACTO_REGISTRY_TOKEN"
+          OCI_REGISTRY="oci://ghcr.io/trianalab/pacto-demo"
 
           # Push single-version bundles (leaves first)
-          PUSH_ORDER="platform-http-policy platform-app-config platform-worker-config postgresql redis stripe-api email-provider auth-service fraud-service notification-worker frontend pacto-demo"
+          PUSH_ORDER="platform-http-policy platform-app-config platform-worker-config postgresql redis stripe-api email-provider auth-service fraud-service notification-worker frontend"
           for svc in $PUSH_ORDER; do
             echo "Pushing $svc..."
-            pacto push "oci://$OCI_REGISTRY/$svc" -p "bundles/$svc"
+            pacto push "$OCI_REGISTRY/$svc" -p "bundles/$svc"
           done
 
           # Push multi-version bundles
@@ -94,6 +90,12 @@ jobs:
             for ver in bundles/$svc/v*/; do
               v=$(basename "$ver" | sed 's/^v//')
               echo "Pushing $svc:$v..."
-              pacto push "oci://$OCI_REGISTRY/$svc:$v" -p "$ver"
+              pacto push "$OCI_REGISTRY/$svc:$v" -p "$ver"
             done
           done
+
+          # Push root entry point last
+          echo "Pushing pacto-demo..."
+          pacto push "$OCI_REGISTRY/pacto-demo" -p "bundles/pacto-demo"
+        env:
+          PACTO_REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
