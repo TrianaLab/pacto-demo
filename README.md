@@ -10,6 +10,20 @@ Production failures rarely happen because the code is wrong. They happen because
 
 ---
 
+## Try It Now
+
+Install the [Pacto CLI](https://github.com/trianalab/pacto), then run:
+
+```bash
+pacto dashboard --repo oci://ghcr.io/trianalab/pacto-demo/pacto-demo
+```
+
+This launches an interactive dashboard that resolves the full dependency graph from a single entry point and lets you explore every service, interface, dependency, and configuration in the platform.
+
+No cloning required. Everything is pulled live from the OCI registry.
+
+---
+
 ## What This Demo Shows
 
 This repository models a **complete e-commerce platform** with 15 services across 5 tiers. It's designed to demonstrate every feature of the Pacto schema in a realistic context.
@@ -67,7 +81,9 @@ The **payments-service** is the hero of this demo. It evolves through 4 versions
 Diff v1.2.0 against v2.0.0 to see every breaking change detected:
 
 ```bash
-pacto diff bundles/payments-service/v1.2.0 bundles/payments-service/v2.0.0
+pacto diff \
+  oci://ghcr.io/trianalab/pacto-demo/payments-service:1.2.0 \
+  oci://ghcr.io/trianalab/pacto-demo/payments-service:2.0.0
 ```
 
 Changes detected:
@@ -95,12 +111,12 @@ Changes detected:
 
 All services use local configuration schemas. Services that share platform-level config include those properties alongside service-specific ones:
 
-**Domain-specific schema** (payments-service):
+**Domain-specific schema** (payments-service v2.0.0):
 ```yaml
 configuration:
   schema: configuration/schema.json
   values:
-    STRIPE_API_KEY: "${STRIPE_API_KEY}"
+    STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY}"
     PAYMENTS_DB_URL: postgresql://postgres:5432/payments
 ```
 
@@ -147,9 +163,7 @@ bundles/payments-service/v2.0.0/
 
 ---
 
-## Quickstart
-
-Prerequisites: [Pacto CLI](https://github.com/trianalab/pacto)
+## More CLI Examples
 
 ```bash
 # resolve the full dependency graph from the root
@@ -158,29 +172,18 @@ pacto graph oci://ghcr.io/trianalab/pacto-demo/pacto-demo
 # inspect any service
 pacto explain oci://ghcr.io/trianalab/pacto-demo/payments-service:2.0.0
 
-# detect breaking changes
-pacto diff \
-  oci://ghcr.io/trianalab/pacto-demo/payments-service:1.2.0 \
-  oci://ghcr.io/trianalab/pacto-demo/payments-service:2.0.0
-
 # validate a contract
 pacto validate oci://ghcr.io/trianalab/pacto-demo/auth-service
 
 # generate documentation
 pacto doc oci://ghcr.io/trianalab/pacto-demo/orders-service:1.1.0
-
-# launch the interactive dashboard
-pacto dashboard oci://ghcr.io/trianalab/pacto-demo/pacto-demo
 ```
 
-### Local development
+### Local Development
 
 ```bash
 # validate all bundles
 make validate
-
-# show the full graph
-make graph
 
 # diff payments-service breaking change
 make breaking-change
@@ -188,11 +191,11 @@ make breaking-change
 # diff non-breaking evolution
 make evolution
 
+# launch the interactive dashboard
+make dashboard
+
 # package all bundles
 make pack
-
-# push all bundles to OCI registry
-make push
 ```
 
 ---
@@ -204,7 +207,6 @@ Every change is validated before it reaches production. This repository runs the
 | Capability | Workflow | What it demonstrates |
 |------------|----------|----------------------|
 | Validation | [Validate & Explain](../../actions/workflows/demo-validate.yml) | `pacto validate` + `pacto explain` on all 20 contracts |
-| Dependency graph | [Dependency Graph](../../actions/workflows/demo-graph.yml) | `pacto graph` resolves the full platform from root |
 | Breaking changes | [Breaking Change Detection](../../actions/workflows/demo-breaking-change.yml) | payments-service v1.2.0 vs v2.0.0 breaking change diff |
 | Documentation | [Contract Documentation](../../actions/workflows/demo-docs.yml) | `pacto doc` generates docs for every contract |
 | Packaging | [Pack Contract Bundles](../../actions/workflows/demo-pack.yml) | `pacto pack` creates OCI-ready bundles |
