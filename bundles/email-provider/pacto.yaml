@@ -1,0 +1,26 @@
+pactoVersion: "1.0"
+
+service:
+  name: email-provider
+  version: 1.0.0
+  owner: external/sendgrid
+
+interfaces:
+  - name: http
+    type: http
+    port: 443
+    visibility: public
+    contract: interfaces/openapi.json
+
+metadata:
+  tier: external
+  category: notifications
+  criticality: medium
+  summary: External email delivery provider (SendGrid)
+  serviceType: external
+  protocol: https
+  tags:
+    - email
+    - notifications
+    - external
+    - sendgrid

@@ -1,0 +1,65 @@
+pactoVersion: "1.0"
+
+service:
+  name: notification-worker
+  version: 1.0.0
+  owner: team/platform
+  image:
+    ref: ghcr.io/trianalab/pacto-demo/notification-worker:1.0.0
+  chart:
+    ref: oci://ghcr.io/trianalab/charts/notification-worker:1.0.0
+
+interfaces:
+  - name: events
+    type: event
+    visibility: internal
+    contract: interfaces/events.json
+
+configuration:
+  ref: oci://ghcr.io/trianalab/pacto-demo/platform-worker-config
+  values:
+    OTEL_SERVICE_NAME: notification-worker
+    WORKER_CONCURRENCY: 3
+    EMAIL_PROVIDER_URL: https://api.sendgrid.com
+    EMAIL_FROM: noreply@platform.example.com
+    SENDGRID_API_KEY: "${SENDGRID_API_KEY}"
+
+policy:
+  ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
+
+dependencies:
+  - ref: oci://ghcr.io/trianalab/pacto-demo/email-provider
+    required: true
+    compatibility: "^1.0.0"
+
+runtime:
+  workload: scheduled
+  state:
+    type: stateless
+    persistence:
+      scope: local
+      durability: ephemeral
+    dataCriticality: low
+  lifecycle:
+    upgradeStrategy: rolling
+    gracefulShutdownSeconds: 30
+  health:
+    interface: http
+    path: /health
+
+scaling:
+  replicas: 1
+
+metadata:
+  tier: domain
+  category: notifications
+  criticality: medium
+  summary: Background worker that processes notification events and sends emails
+  language: go
+  repo: github.com/trianalab/pacto-demo/notification-worker
+  tags:
+    - notifications
+    - email
+    - worker
+    - events
+    - scheduled

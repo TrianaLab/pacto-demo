@@ -19,23 +19,19 @@ jobs:
         with:
           command: setup
 
-      - name: Generate runtime documentation
-        uses: trianalab/pacto-actions@v1
-        with:
-          command: doc
-          path: services/runtime/pacto
-          add-to-summary: "true"
+      - name: Generate documentation for all contracts
+        run: |
+          SINGLE="platform-http-policy platform-app-config platform-worker-config postgresql redis stripe-api email-provider auth-service fraud-service notification-worker frontend pacto-demo"
+          MULTI="api-gateway orders-service payments-service"
 
-      - name: Generate inference documentation
-        uses: trianalab/pacto-actions@v1
-        with:
-          command: doc
-          path: services/inference/pacto
-          add-to-summary: "true"
+          for svc in $SINGLE; do
+            echo "Generating docs for $svc..."
+            pacto doc "bundles/$svc" --add-to-summary || true
+          done
 
-      - name: Generate api documentation
-        uses: trianalab/pacto-actions@v1
-        with:
-          command: doc
-          path: services/api/pacto
-          add-to-summary: "true"
+          for svc in $MULTI; do
+            for ver in bundles/$svc/v*/; do
+              echo "Generating docs for $svc/$(basename $ver)..."
+              pacto doc "$ver" --add-to-summary || true
+            done
+          done

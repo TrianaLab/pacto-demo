@@ -1,6 +1,0 @@
-host: "0.0.0.0"
-port: 8082
-runtime_url: "http://runtime:8081"
-timeout_seconds: 30
-max_retries: 3
-log_level: info

@@ -1,81 +1,131 @@
-SERVICES := runtime inference api
 REGISTRY := ghcr.io/trianalab/pacto-demo
 
-.PHONY: generate build validate explain graph doc pack push diff breaking-change clean
+# Single-version bundles
+SINGLE_BUNDLES := \
+	platform-http-policy \
+	platform-app-config \
+	platform-worker-config \
+	postgresql \
+	redis \
+	stripe-api \
+	email-provider \
+	auth-service \
+	fraud-service \
+	notification-worker \
+	frontend \
+	pacto-demo
 
-## -- Code Generation -------------------------------------------
+# Multi-version bundles (version dirs under the bundle)
+MULTI_BUNDLES := \
+	api-gateway \
+	orders-service \
+	payments-service
 
-# Generate JSON Schema and OpenAPI specs using Pacto plugins
-generate:
-	@for svc in $(SERVICES); do \
-		echo "==> Generating schemas for $$svc..."; \
-		pacto generate schema-infer services/$$svc/pacto --option file=config.yaml -o services/$$svc/pacto; \
-		ln -sf pacto/pacto.yaml services/$$svc/pacto.yaml; \
-		pacto generate openapi-infer services/$$svc --option framework=huma --option output=interfaces/openapi.json -o services/$$svc/pacto; \
-		rm -f services/$$svc/pacto.yaml; \
-	done
-
-# Build all service binaries
-build:
-	@for svc in $(SERVICES); do \
-		go build -o bin/$$svc ./services/$$svc/cmd/...; \
-	done
+.PHONY: validate explain graph doc pack push push-all diff breaking-change dashboard clean
 
 ## -- Pacto Commands --------------------------------------------
 
-# Validate every contract against the Pacto specification
+# Validate every contract bundle
 validate:
-	@for svc in $(SERVICES); do \
-		pacto validate services/$$svc/pacto; \
+	@echo "==> Validating single-version bundles..."
+	@for svc in $(SINGLE_BUNDLES); do \
+		echo "  $$svc"; \
+		pacto validate bundles/$$svc; \
+	done
+	@echo "==> Validating multi-version bundles..."
+	@for svc in $(MULTI_BUNDLES); do \
+		for ver in bundles/$$svc/v*/; do \
+			echo "  $$svc/$$(basename $$ver)"; \
+			pacto validate $$ver; \
+		done; \
 	done
 
 # Print a human-readable summary of each contract
 explain:
-	@for svc in $(SERVICES); do \
-		pacto explain services/$$svc/pacto; \
+	@for svc in $(SINGLE_BUNDLES); do \
+		pacto explain bundles/$$svc; \
 		echo ""; \
 	done
+	@for svc in $(MULTI_BUNDLES); do \
+		for ver in bundles/$$svc/v*/; do \
+			pacto explain $$ver; \
+			echo ""; \
+		done; \
+	done
 
-# Resolve and display the full dependency graph (from the top-level service)
+# Resolve and display the full dependency graph from the root
 graph:
-	@pacto graph services/api/pacto
+	@pacto graph oci://$(REGISTRY)/pacto-demo
 
-# Generate rich Markdown documentation for every contract
+# Generate documentation for every contract
 doc:
 	@mkdir -p dist/docs
-	@for svc in $(SERVICES); do \
-		pacto doc services/$$svc/pacto -o dist/docs/$$svc; \
-		echo "Generated docs for $$svc -> dist/docs/$$svc/"; \
+	@for svc in $(SINGLE_BUNDLES); do \
+		pacto doc bundles/$$svc -o dist/docs/$$svc; \
+	done
+	@for svc in $(MULTI_BUNDLES); do \
+		for ver in bundles/$$svc/v*/; do \
+			v=$$(basename $$ver); \
+			pacto doc $$ver -o dist/docs/$$svc-$$v; \
+		done; \
 	done
 
-# Package every contract into an OCI-ready tar.gz bundle
+# Package every contract into an OCI-ready bundle
 pack:
 	@mkdir -p dist
-	@for svc in $(SERVICES); do \
-		pacto pack services/$$svc/pacto -o dist/$$svc.tar.gz; \
+	@for svc in $(SINGLE_BUNDLES); do \
+		pacto pack bundles/$$svc -o dist/$$svc.tar.gz; \
+	done
+	@for svc in $(MULTI_BUNDLES); do \
+		for ver in bundles/$$svc/v*/; do \
+			v=$$(basename $$ver | sed 's/^v//'); \
+			pacto pack $$ver -o dist/$$svc-$$v.tar.gz; \
+		done; \
 	done
 
-# Push all contract bundles to an OCI registry (requires authentication)
+# Push all contract bundles to the OCI registry
 push:
-	@for svc in $(SERVICES); do \
-		pacto push oci://$(REGISTRY)/$$svc -p services/$$svc/pacto; \
+	@echo "==> Pushing single-version bundles..."
+	@for svc in $(SINGLE_BUNDLES); do \
+		echo "  $(REGISTRY)/$$svc"; \
+		pacto push oci://$(REGISTRY)/$$svc -p bundles/$$svc; \
+	done
+	@echo "==> Pushing multi-version bundles..."
+	@for svc in $(MULTI_BUNDLES); do \
+		for ver in bundles/$$svc/v*/; do \
+			v=$$(basename $$ver | sed 's/^v//'); \
+			echo "  $(REGISTRY)/$$svc:$$v"; \
+			pacto push oci://$(REGISTRY)/$$svc:$$v -p $$ver; \
+		done; \
 	done
 
 # Compare two contract versions (usage: make diff OLD=<path-or-oci> NEW=<path-or-oci>)
 diff:
 	@pacto diff $(OLD) $(NEW)
 
-## -- Demo ------------------------------------------------------
+## -- Demo Scenarios --------------------------------------------
 
-# Detect breaking changes using overrides (no file edits needed)
+# Show the payments-service breaking change (v1.2.0 -> v2.0.0)
 breaking-change:
-	@pacto diff oci://ghcr.io/trianalab/pacto-demo/runtime services/runtime/pacto \
-		--new-set service.version=2.0.0 \
-		--new-set 'service.image.ref=ghcr.io/trianalab/pacto-demo/runtime:2.0.0' \
-		--new-set 'interfaces[0].port=9090' \
+	@echo "==> Breaking change: payments-service v1.2.0 -> v2.0.0"
+	@pacto diff \
+		bundles/payments-service/v1.2.0 \
+		bundles/payments-service/v2.0.0 \
 		--output-format markdown || true
+
+# Show a non-breaking evolution (payments-service v1.0.0 -> v1.1.0)
+evolution:
+	@echo "==> Non-breaking evolution: payments-service v1.0.0 -> v1.1.0"
+	@pacto diff \
+		bundles/payments-service/v1.0.0 \
+		bundles/payments-service/v1.1.0 \
+		--output-format markdown || true
+
+# Launch the interactive dashboard from the root entry point
+dashboard:
+	@pacto dashboard oci://$(REGISTRY)/pacto-demo
 
 ## -- Housekeeping ----------------------------------------------
 
 clean:
-	@rm -rf bin/ dist/
+	@rm -rf dist/

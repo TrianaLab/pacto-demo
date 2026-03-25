@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   breaking-change:
-    name: Detect Breaking Changes (with overrides)
+    name: Detect Breaking Changes (payments-service v1.2.0 vs v2.0.0)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,18 +19,13 @@ jobs:
         with:
           command: setup
 
-      # Diff the published OCI artifact against the local contract with overrides
       - name: Detect breaking changes
         id: diff
         uses: trianalab/pacto-actions@v1
         with:
           command: diff
-          old: oci://ghcr.io/trianalab/pacto-demo/runtime
-          new: services/runtime/pacto
-          new-set: |
-            service.version=2.0.0
-            service.image.ref=ghcr.io/trianalab/pacto-demo/runtime:2.0.0
-            interfaces[0].port=9090
+          old: bundles/payments-service/v1.2.0
+          new: bundles/payments-service/v2.0.0
           output-format: markdown
           fail-on-breaking: "false"
 
@@ -41,20 +36,18 @@ jobs:
           {
             echo "## Breaking Change Detection Demo"
             echo ""
-            echo "This workflow uses \`--new-set\` overrides to simulate breaking changes"
-            echo "on the \`runtime\` contract and diffs the result against the published"
-            echo "OCI artifact at \`oci://ghcr.io/trianalab/pacto-demo/runtime\`."
+            echo "This workflow compares \`payments-service\` v1.2.0 against v2.0.0"
+            echo "to demonstrate how Pacto detects breaking changes across:"
             echo ""
-            echo "**Changes simulated via overrides:**"
-            echo "1. Bumped version from 1.0.0 to 2.0.0 (\`--new-set service.version=2.0.0\`)"
-            echo "2. Updated image tag (\`--new-set service.image.ref=....:2.0.0\`)"
-            echo "3. Changed HTTP port from 8081 to 9090 (\`--new-set interfaces[0].port=9090\`)"
+            echo "- **API**: \`/charges\` removed, \`/payment-intents\` introduced"
+            echo "- **Config**: \`STRIPE_API_KEY\` renamed to \`STRIPE_SECRET_KEY\`, \`WEBHOOK_SECRET\` now required"
+            echo "- **Dependencies**: \`fraud-service\` changed from optional to required"
+            echo "- **Runtime**: upgrade strategy changed from rolling to blue-green"
+            echo "- **Events**: \`payment.completed\`/\`payment.failed\` replaced by \`payment.intent.*\`"
             echo ""
             if [ "${HAS_BREAKING}" = "true" ]; then
               echo "**Result: Breaking changes detected.**"
             else
               echo "**Result: No breaking changes.**"
             fi
-            echo ""
-            echo "No files were copied or modified — overrides are applied at diff time."
           } >> "${GITHUB_STEP_SUMMARY}"

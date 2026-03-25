@@ -1,0 +1,40 @@
+pactoVersion: "1.0"
+
+service:
+  name: redis
+  version: 7.2.0
+  owner: team/platform
+  image:
+    ref: docker.io/library/redis:7.2
+
+runtime:
+  workload: service
+  state:
+    type: stateful
+    persistence:
+      scope: cluster
+      durability: semi-persistent
+    dataCriticality: medium
+  lifecycle:
+    upgradeStrategy: rolling
+    gracefulShutdownSeconds: 30
+  health:
+    interface: tcp
+    port: 6379
+
+scaling:
+  replicas: 1
+
+metadata:
+  tier: infra
+  category: storage
+  criticality: high
+  summary: In-memory data store for caching, sessions, and rate limiting
+  serviceType: infrastructure
+  protocol: redis
+  repo: github.com/trianalab/pacto-demo/redis
+  tags:
+    - cache
+    - sessions
+    - rate-limiting
+    - infrastructure

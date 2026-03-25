@@ -1,0 +1,65 @@
+pactoVersion: "1.0"
+
+service:
+  name: frontend
+  version: 1.0.0
+  owner: team/frontend
+  image:
+    ref: ghcr.io/trianalab/pacto-demo/frontend:1.0.0
+  chart:
+    ref: oci://ghcr.io/trianalab/charts/frontend:1.0.0
+
+interfaces:
+  - name: http
+    type: http
+    port: 3000
+    visibility: public
+    contract: interfaces/openapi.json
+
+configuration:
+  ref: oci://ghcr.io/trianalab/pacto-demo/platform-app-config
+  values:
+    OTEL_SERVICE_NAME: frontend
+    API_GATEWAY_URL: http://api-gateway:8080
+    NEXT_PUBLIC_APP_NAME: "Commerce Platform"
+    NODE_ENV: production
+
+policy:
+  ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
+
+dependencies:
+  - ref: oci://ghcr.io/trianalab/pacto-demo/api-gateway
+    required: true
+    compatibility: "^1.0.0"
+
+runtime:
+  workload: service
+  state:
+    type: stateless
+    persistence:
+      scope: local
+      durability: ephemeral
+    dataCriticality: low
+  lifecycle:
+    upgradeStrategy: rolling
+    gracefulShutdownSeconds: 10
+  health:
+    interface: http
+    path: /health
+
+scaling:
+  min: 2
+  max: 6
+
+metadata:
+  tier: edge
+  category: frontend
+  criticality: high
+  summary: Customer-facing web application for the e-commerce platform
+  language: typescript
+  repo: github.com/trianalab/pacto-demo/frontend
+  tags:
+    - frontend
+    - nextjs
+    - web
+    - public

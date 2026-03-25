@@ -1,0 +1,74 @@
+pactoVersion: "1.0"
+
+service:
+  name: api-gateway
+  version: 1.1.0
+  owner: team/platform
+  image:
+    ref: ghcr.io/trianalab/pacto-demo/api-gateway:1.1.0
+  chart:
+    ref: oci://ghcr.io/trianalab/charts/api-gateway:1.1.0
+
+interfaces:
+  - name: http
+    type: http
+    port: 8080
+    visibility: public
+    contract: interfaces/openapi.json
+
+configuration:
+  ref: oci://ghcr.io/trianalab/pacto-demo/platform-app-config
+  values:
+    OTEL_SERVICE_NAME: api-gateway
+    AUTH_SERVICE_URL: auth-service:50051
+    ORDERS_SERVICE_URL: http://orders-service:8082
+    PAYMENTS_SERVICE_URL: http://payments-service:8083
+    REQUEST_TIMEOUT_SECONDS: 30
+    ENABLE_WEBSOCKETS: true
+
+policy:
+  schema: policy/schema.json
+
+dependencies:
+  - ref: oci://ghcr.io/trianalab/pacto-demo/auth-service
+    required: true
+    compatibility: "^1.0.0"
+  - ref: oci://ghcr.io/trianalab/pacto-demo/orders-service
+    required: true
+    compatibility: "^1.0.0"
+  - ref: oci://ghcr.io/trianalab/pacto-demo/payments-service
+    required: true
+    compatibility: "^1.0.0"
+
+runtime:
+  workload: service
+  state:
+    type: stateless
+    persistence:
+      scope: local
+      durability: ephemeral
+    dataCriticality: low
+  lifecycle:
+    upgradeStrategy: rolling
+    gracefulShutdownSeconds: 15
+  health:
+    interface: http
+    path: /health
+
+scaling:
+  min: 2
+  max: 5
+
+metadata:
+  tier: edge
+  category: gateway
+  criticality: high
+  summary: API gateway with WebSocket support and order tracking endpoints
+  language: go
+  repo: github.com/trianalab/pacto-demo/api-gateway
+  tags:
+    - gateway
+    - routing
+    - websockets
+    - authentication
+    - public

@@ -1,0 +1,65 @@
+pactoVersion: "1.0"
+
+service:
+  name: fraud-service
+  version: 1.0.0
+  owner: team/risk
+  image:
+    ref: ghcr.io/trianalab/pacto-demo/fraud-service:1.0.0
+  chart:
+    ref: oci://ghcr.io/trianalab/charts/fraud-service:1.0.0
+
+interfaces:
+  - name: grpc
+    type: grpc
+    port: 50052
+    visibility: internal
+    contract: interfaces/fraud.proto
+
+configuration:
+  schema: configuration/schema.json
+  values:
+    LOG_LEVEL: info
+    RISK_THRESHOLD: 0.7
+    MODEL_VERSION: v2.3.1
+    REDIS_URL: redis://redis:6379/2
+
+policy:
+  ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
+
+dependencies:
+  - ref: oci://ghcr.io/trianalab/pacto-demo/redis
+    required: true
+    compatibility: "^7.0.0"
+
+runtime:
+  workload: service
+  state:
+    type: stateless
+    persistence:
+      scope: local
+      durability: ephemeral
+    dataCriticality: low
+  lifecycle:
+    upgradeStrategy: rolling
+    gracefulShutdownSeconds: 10
+  health:
+    interface: grpc
+    path: /grpc.health.v1.Health/Check
+
+scaling:
+  min: 2
+  max: 4
+
+metadata:
+  tier: domain
+  category: payments
+  criticality: high
+  summary: Real-time fraud detection service using ML-based risk scoring
+  language: go
+  repo: github.com/trianalab/pacto-demo/fraud-service
+  tags:
+    - fraud-detection
+    - risk-scoring
+    - ml
+    - payments

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Platform HTTP Policy",
+  "type": "object",
+  "properties": {
+    "rateLimit": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "requestsPerSecond": { "type": "integer", "default": 100 },
+        "burstSize": { "type": "integer", "default": 50 }
+      },
+      "required": ["enabled", "requestsPerSecond"]
+    },
+    "cors": {
+      "type": "object",
+      "properties": {
+        "allowedOrigins": { "type": "array", "items": { "type": "string" } },
+        "allowedMethods": { "type": "array", "items": { "type": "string" } },
+        "maxAge": { "type": "integer", "default": 3600 }
+      },
+      "required": ["allowedOrigins"]
+    },
+    "authentication": {
+      "type": "object",
+      "properties": {
+        "required": { "type": "boolean", "default": true },
+        "type": { "type": "string", "enum": ["jwt", "api-key", "oauth2"] },
+        "jwksUrl": { "type": "string", "format": "uri" }
+      },
+      "required": ["required", "type"]
+    },
+    "tls": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "minVersion": { "type": "string", "default": "1.2" }
+      }
+    }
+  },
+  "required": ["rateLimit", "authentication"]
+}

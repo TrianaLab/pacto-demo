@@ -1,9 +1,6 @@
-# Binaries
+# Build artifacts
+dist/
 bin/
-*.exe
-
-# Go
-vendor/
 
 # OS
 .DS_Store

@@ -1,0 +1,34 @@
+pactoVersion: "1.0"
+
+service:
+  name: pacto-demo
+  version: 1.0.0
+  owner: team/platform
+
+dependencies:
+  - ref: oci://ghcr.io/trianalab/pacto-demo/frontend
+    required: true
+    compatibility: "^1.0.0"
+
+runtime:
+  workload: service
+  state:
+    type: stateless
+    persistence:
+      scope: local
+      durability: ephemeral
+    dataCriticality: low
+  lifecycle:
+    upgradeStrategy: rolling
+    gracefulShutdownSeconds: 5
+
+metadata:
+  tier: demo-root
+  category: platform
+  criticality: low
+  summary: Entry point for full platform graph - discovers all services recursively via frontend
+  tags:
+    - demo
+    - root
+    - entry-point
+    - platform
