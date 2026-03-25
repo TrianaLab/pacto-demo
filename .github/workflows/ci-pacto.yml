@@ -79,7 +79,7 @@ jobs:
         run: |
           OCI_REGISTRY="ghcr.io/trianalab/pacto-demo"
 
-          echo "$PACTO_REGISTRY_TOKEN" | pacto login ghcr.io -u ${{ github.actor }} --password-stdin
+          pacto login ghcr.io -u ${{ github.actor }} -p "$PACTO_REGISTRY_TOKEN"
 
           # Push single-version bundles (leaves first)
           PUSH_ORDER="platform-http-policy platform-app-config platform-worker-config postgresql redis stripe-api email-provider auth-service fraud-service notification-worker frontend pacto-demo"

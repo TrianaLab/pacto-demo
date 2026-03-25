@@ -24,7 +24,7 @@ jobs:
         env:
           PACTO_REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "$PACTO_REGISTRY_TOKEN" | pacto login ghcr.io -u ${{ github.actor }} --password-stdin
+          pacto login ghcr.io -u ${{ github.actor }} -p "$PACTO_REGISTRY_TOKEN"
 
           {
             echo "## Full Platform Dependency Graph"
