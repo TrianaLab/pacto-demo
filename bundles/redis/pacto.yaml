@@ -12,8 +12,8 @@ runtime:
   state:
     type: stateful
     persistence:
-      scope: cluster
-      durability: semi-persistent
+      scope: shared
+      durability: persistent
     dataCriticality: medium
   lifecycle:
     upgradeStrategy: rolling

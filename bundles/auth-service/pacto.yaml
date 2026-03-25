@@ -38,8 +38,8 @@ runtime:
   state:
     type: hybrid
     persistence:
-      scope: cluster
-      durability: semi-persistent
+      scope: shared
+      durability: persistent
     dataCriticality: high
   lifecycle:
     upgradeStrategy: rolling

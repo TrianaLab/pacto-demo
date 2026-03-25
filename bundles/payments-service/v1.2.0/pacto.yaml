@@ -49,7 +49,7 @@ runtime:
   state:
     type: stateful
     persistence:
-      scope: cluster
+      scope: shared
       durability: persistent
     dataCriticality: high
   lifecycle:
