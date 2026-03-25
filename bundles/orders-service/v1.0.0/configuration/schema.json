@@ -5,12 +5,20 @@
   "properties": {
     "LOG_LEVEL": {
       "type": "string",
-      "enum": ["debug", "info", "warn", "error"],
+      "enum": [
+        "debug",
+        "info",
+        "warn",
+        "error"
+      ],
       "default": "info"
     },
     "LOG_FORMAT": {
       "type": "string",
-      "enum": ["json", "text"],
+      "enum": [
+        "json",
+        "text"
+      ],
       "default": "json"
     },
     "OTEL_EXPORTER_ENDPOINT": {
@@ -37,5 +45,8 @@
       "format": "uri"
     }
   },
-  "required": ["LOG_LEVEL", "LOG_FORMAT", "OTEL_EXPORTER_ENDPOINT", "DATABASE_URL", "PAYMENTS_SERVICE_URL"]
+  "required": [
+    "DATABASE_URL",
+    "PAYMENTS_SERVICE_URL"
+  ]
 }

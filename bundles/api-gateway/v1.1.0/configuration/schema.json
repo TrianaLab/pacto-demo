@@ -5,12 +5,20 @@
   "properties": {
     "LOG_LEVEL": {
       "type": "string",
-      "enum": ["debug", "info", "warn", "error"],
+      "enum": [
+        "debug",
+        "info",
+        "warn",
+        "error"
+      ],
       "default": "info"
     },
     "LOG_FORMAT": {
       "type": "string",
-      "enum": ["json", "text"],
+      "enum": [
+        "json",
+        "text"
+      ],
       "default": "json"
     },
     "OTEL_EXPORTER_ENDPOINT": {
@@ -46,5 +54,11 @@
       "type": "boolean"
     }
   },
-  "required": ["LOG_LEVEL", "LOG_FORMAT", "OTEL_EXPORTER_ENDPOINT", "AUTH_SERVICE_URL", "ORDERS_SERVICE_URL", "PAYMENTS_SERVICE_URL", "REQUEST_TIMEOUT_SECONDS", "ENABLE_WEBSOCKETS"]
+  "required": [
+    "AUTH_SERVICE_URL",
+    "ORDERS_SERVICE_URL",
+    "PAYMENTS_SERVICE_URL",
+    "REQUEST_TIMEOUT_SECONDS",
+    "ENABLE_WEBSOCKETS"
+  ]
 }
