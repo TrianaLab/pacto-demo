@@ -21,7 +21,11 @@ jobs:
           command: setup
 
       - name: Generate full dependency graph
+        env:
+          PACTO_REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          echo "$PACTO_REGISTRY_TOKEN" | pacto login ghcr.io -u ${{ github.actor }} --password-stdin
+
           {
             echo "## Full Platform Dependency Graph"
             echo ""

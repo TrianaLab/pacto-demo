@@ -75,18 +75,17 @@ jobs:
       - name: Push contracts to OCI registry
         if: github.event_name == 'push'
         env:
-          REGISTRY: ghcr.io
-          USERNAME: ${{ github.actor }}
-          PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+          PACTO_REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           OCI_REGISTRY="ghcr.io/trianalab/pacto-demo"
+
+          echo "$PACTO_REGISTRY_TOKEN" | pacto login ghcr.io -u ${{ github.actor }} --password-stdin
 
           # Push single-version bundles (leaves first)
           PUSH_ORDER="platform-http-policy platform-app-config platform-worker-config postgresql redis stripe-api email-provider auth-service fraud-service notification-worker frontend pacto-demo"
           for svc in $PUSH_ORDER; do
             echo "Pushing $svc..."
-            pacto push "oci://$OCI_REGISTRY/$svc" -p "bundles/$svc" \
-              --registry "$REGISTRY" --username "$USERNAME" --password "$PASSWORD"
+            pacto push "oci://$OCI_REGISTRY/$svc" -p "bundles/$svc"
           done
 
           # Push multi-version bundles
@@ -94,7 +93,6 @@ jobs:
             for ver in bundles/$svc/v*/; do
               v=$(basename "$ver" | sed 's/^v//')
               echo "Pushing $svc:$v..."
-              pacto push "oci://$OCI_REGISTRY/$svc:$v" -p "$ver" \
-                --registry "$REGISTRY" --username "$USERNAME" --password "$PASSWORD"
+              pacto push "oci://$OCI_REGISTRY/$svc:$v" -p "$ver"
             done
           done
