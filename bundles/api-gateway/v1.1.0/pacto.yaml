@@ -6,8 +6,6 @@ service:
   owner: team/platform
   image:
     ref: ghcr.io/trianalab/pacto-demo/api-gateway:1.1.0
-  chart:
-    ref: oci://ghcr.io/trianalab/charts/api-gateway:1.1.0
 
 interfaces:
   - name: http
@@ -17,7 +15,7 @@ interfaces:
     contract: interfaces/openapi.json
 
 configuration:
-  ref: oci://ghcr.io/trianalab/pacto-demo/platform-app-config
+  schema: configuration/schema.json
   values:
     OTEL_SERVICE_NAME: api-gateway
     AUTH_SERVICE_URL: auth-service:50051

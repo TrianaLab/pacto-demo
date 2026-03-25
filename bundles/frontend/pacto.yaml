@@ -6,8 +6,6 @@ service:
   owner: team/frontend
   image:
     ref: ghcr.io/trianalab/pacto-demo/frontend:1.0.0
-  chart:
-    ref: oci://ghcr.io/trianalab/charts/frontend:1.0.0
 
 interfaces:
   - name: http
@@ -17,7 +15,7 @@ interfaces:
     contract: interfaces/openapi.json
 
 configuration:
-  ref: oci://ghcr.io/trianalab/pacto-demo/platform-app-config
+  schema: configuration/schema.json
   values:
     OTEL_SERVICE_NAME: frontend
     API_GATEWAY_URL: http://api-gateway:8080

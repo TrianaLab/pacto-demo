@@ -6,8 +6,6 @@ service:
   owner: team/commerce
   image:
     ref: ghcr.io/trianalab/pacto-demo/orders-service:1.0.0
-  chart:
-    ref: oci://ghcr.io/trianalab/charts/orders-service:1.0.0
 
 interfaces:
   - name: http
@@ -21,7 +19,7 @@ interfaces:
     contract: interfaces/events.json
 
 configuration:
-  ref: oci://ghcr.io/trianalab/pacto-demo/platform-app-config
+  schema: configuration/schema.json
   values:
     OTEL_SERVICE_NAME: orders-service
     DATABASE_URL: postgresql://postgres:5432/orders

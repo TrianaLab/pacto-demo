@@ -6,8 +6,6 @@ service:
   owner: team/platform
   image:
     ref: ghcr.io/trianalab/pacto-demo/notification-worker:1.0.0
-  chart:
-    ref: oci://ghcr.io/trianalab/charts/notification-worker:1.0.0
 
 interfaces:
   - name: events
@@ -16,7 +14,7 @@ interfaces:
     contract: interfaces/events.json
 
 configuration:
-  ref: oci://ghcr.io/trianalab/pacto-demo/platform-worker-config
+  schema: configuration/schema.json
   values:
     OTEL_SERVICE_NAME: notification-worker
     WORKER_CONCURRENCY: 3

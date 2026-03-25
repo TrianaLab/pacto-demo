@@ -6,8 +6,6 @@ service:
   owner: team/identity
   image:
     ref: ghcr.io/trianalab/pacto-demo/auth-service:1.0.0
-  chart:
-    ref: oci://ghcr.io/trianalab/charts/auth-service:1.0.0
 
 interfaces:
   - name: grpc
@@ -17,7 +15,7 @@ interfaces:
     contract: interfaces/auth.proto
 
 configuration:
-  ref: oci://ghcr.io/trianalab/pacto-demo/platform-app-config
+  schema: configuration/schema.json
   values:
     OTEL_SERVICE_NAME: auth-service
     JWT_ISSUER: https://auth.platform.internal

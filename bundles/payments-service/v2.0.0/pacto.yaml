@@ -6,8 +6,6 @@ service:
   owner: team/payments
   image:
     ref: ghcr.io/trianalab/pacto-demo/payments-service:2.0.0
-  chart:
-    ref: oci://ghcr.io/trianalab/charts/payments-service:2.0.0
 
 interfaces:
   - name: http
