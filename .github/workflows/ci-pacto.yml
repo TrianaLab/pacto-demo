@@ -77,6 +77,11 @@ jobs:
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         run: |
           OCI_REGISTRY="oci://ghcr.io/trianalab/pacto-demo"
+          REGISTRY="ghcr.io"
+          USERNAME="${{ github.actor }}"
+          PASSWORD="${{ secrets.GITHUB_TOKEN }}"
+
+          pacto login "$REGISTRY" -u "$USERNAME" -p "$PASSWORD"
 
           # Push single-version bundles (leaves first)
           PUSH_ORDER="platform-http-policy platform-app-config platform-worker-config postgresql redis stripe-api email-provider auth-service fraud-service notification-worker frontend"
@@ -97,5 +102,3 @@ jobs:
           # Push root entry point last
           echo "Pushing pacto-demo..."
           pacto push "$OCI_REGISTRY/pacto-demo" -p "bundles/pacto-demo"
-        env:
-          PACTO_REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
