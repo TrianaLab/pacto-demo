@@ -42,7 +42,7 @@ jobs:
             echo "- **API**: \`/charges\` removed, \`/payment-intents\` introduced"
             echo "- **Config**: \`STRIPE_API_KEY\` renamed to \`STRIPE_SECRET_KEY\`, \`WEBHOOK_SECRET\` now required"
             echo "- **Dependencies**: \`fraud-service\` changed from optional to required"
-            echo "- **Runtime**: upgrade strategy changed from rolling to blue-green"
+            echo "- **Runtime**: upgrade strategy changed from rolling to recreate"
             echo "- **Events**: \`payment.completed\`/\`payment.failed\` replaced by \`payment.intent.*\`"
             echo ""
             if [ "${HAS_BREAKING}" = "true" ]; then

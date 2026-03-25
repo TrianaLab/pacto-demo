@@ -40,14 +40,14 @@ One entry point. Everything else discovered recursively.
 
 | # | Feature | Where to look |
 |---|---------|---------------|
-| 1 | **A service is NOT just dependencies** -- it has interfaces, config, runtime, scaling, owner, image, chart, metadata | Any `pacto.yaml` (e.g. `bundles/payments-service/v2.0.0/pacto.yaml`) |
+| 1 | **A service is NOT just dependencies** -- it has interfaces, config, runtime, scaling, owner, image, metadata | Any `pacto.yaml` (e.g. `bundles/payments-service/v2.0.0/pacto.yaml`) |
 | 2 | **Graph has depth AND meaning** -- recursive deps, optional vs required, infra vs external | `pacto graph oci://ghcr.io/trianalab/pacto-demo/pacto-demo` |
 | 3 | **Real version history** -- 4 versions of payments-service showing evolution | `bundles/payments-service/v{1.0.0,1.1.0,1.2.0,2.0.0}/` |
 | 4 | **Meaningful diff** -- API + config + deps + runtime changes | `pacto diff bundles/payments-service/v1.2.0 bundles/payments-service/v2.0.0` |
 | 5 | **Interface diversity** -- HTTP, gRPC, and event-driven | auth-service (gRPC), payments-service (HTTP + events), notification-worker (events) |
 | 6 | **Visibility** -- public vs internal | frontend/api-gateway (public) vs orders-service/auth-service (internal) |
 | 7 | **State diversity** -- stateless, stateful, hybrid | fraud-service (stateless), postgresql (stateful), auth-service (hybrid) |
-| 8 | **Reusable configuration** via `configuration.ref` | orders-service, frontend, api-gateway all ref `platform-app-config` |
+| 8 | **Shared configuration schemas** -- services share platform-level config properties | orders-service, frontend, api-gateway include platform-app-config properties in local schemas |
 | 9 | **Reusable policy** via `policy.ref` | Most services ref `platform-http-policy`; api-gateway uses local `policy.schema` |
 | 10 | **Workload diversity** -- service vs scheduled | notification-worker is `scheduled`, everything else is `service` |
 
@@ -74,7 +74,7 @@ Changes detected:
 - **API**: `/charges` removed, `/payment-intents` introduced
 - **Config**: `STRIPE_API_KEY` renamed, `WEBHOOK_SECRET` becomes required, `ENABLE_REFUNDS` removed
 - **Dependencies**: `fraud-service` changes from optional to required
-- **Runtime**: upgrade strategy changes from `rolling` to `blue-green`
+- **Runtime**: upgrade strategy changes from `rolling` to `recreate`
 - **Events**: `payment.completed`/`payment.failed` replaced by `payment.intent.*`
 
 ---
@@ -93,7 +93,9 @@ Changes detected:
 
 ### Configuration Patterns
 
-**Pattern A -- Local schema** (payments-service):
+All services use local configuration schemas. Services that share platform-level config include those properties alongside service-specific ones:
+
+**Domain-specific schema** (payments-service):
 ```yaml
 configuration:
   schema: configuration/schema.json
@@ -102,10 +104,10 @@ configuration:
     PAYMENTS_DB_URL: postgresql://postgres:5432/payments
 ```
 
-**Pattern B -- Shared ref** (orders-service):
+**Platform + domain schema** (orders-service):
 ```yaml
 configuration:
-  ref: oci://ghcr.io/trianalab/pacto-demo/platform-app-config
+  schema: configuration/schema.json  # includes platform-app-config properties
   values:
     OTEL_SERVICE_NAME: orders-service
     DATABASE_URL: postgresql://postgres:5432/orders
