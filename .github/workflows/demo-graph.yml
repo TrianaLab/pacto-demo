@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  packages: read
 
 jobs:
   dependency-graph:
@@ -19,27 +20,14 @@ jobs:
         with:
           command: setup
 
-      - name: Generate dependency graph
+      - name: Generate full dependency graph
         run: |
           {
-            echo "## Dependency Graph"
+            echo "## Full Platform Dependency Graph"
             echo ""
-            echo "Resolved from the top-level \`api\` service:"
+            echo "Resolved recursively from the \`pacto-demo\` root entry point:"
             echo ""
             echo '```'
-            pacto graph services/api/pacto
+            pacto graph oci://ghcr.io/trianalab/pacto-demo/pacto-demo
             echo '```'
-            echo ""
-            echo "---"
-            echo ""
-            echo "### Per-service graphs"
-            echo ""
-            for svc in runtime inference api; do
-              echo "#### ${svc}"
-              echo ""
-              echo '```'
-              pacto graph "services/${svc}/pacto"
-              echo '```'
-              echo ""
-            done
           } >> "${GITHUB_STEP_SUMMARY}"

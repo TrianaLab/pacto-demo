@@ -1,0 +1,76 @@
+registry: ghcr.io/trianalab/pacto-demo
+
+layers:
+  edge:
+    - frontend
+    - api-gateway
+
+  domain:
+    - auth-service
+    - orders-service
+    - payments-service
+    - fraud-service
+    - notification-worker
+
+  infra:
+    - postgresql
+    - redis
+
+  external:
+    - stripe-api
+    - email-provider
+
+  shared:
+    - platform-http-policy
+    - platform-app-config
+    - platform-worker-config
+
+  root:
+    - pacto-demo
+
+versions:
+  payments-service:
+    - "1.0.0"
+    - "1.1.0"
+    - "1.2.0"
+    - "2.0.0"
+  api-gateway:
+    - "1.0.0"
+    - "1.1.0"
+  orders-service:
+    - "1.0.0"
+    - "1.1.0"
+  frontend:
+    - "1.0.0"
+  auth-service:
+    - "1.0.0"
+  fraud-service:
+    - "1.0.0"
+  notification-worker:
+    - "1.0.0"
+  postgresql:
+    - "16.0.0"
+  redis:
+    - "7.2.0"
+  stripe-api:
+    - "2024.01.01"
+  email-provider:
+    - "1.0.0"
+  platform-http-policy:
+    - "1.0.0"
+  platform-app-config:
+    - "1.0.0"
+  platform-worker-config:
+    - "1.0.0"
+  pacto-demo:
+    - "1.0.0"
+
+dependency-graph:
+  pacto-demo: [frontend]
+  frontend: [api-gateway]
+  api-gateway: [auth-service, orders-service, payments-service]
+  auth-service: [redis]
+  orders-service: [postgresql, notification-worker, payments-service]
+  payments-service: [postgresql, stripe-api, fraud-service]
+  fraud-service: [redis]
+  notification-worker: [email-provider]

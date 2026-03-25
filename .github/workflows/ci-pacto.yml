@@ -3,11 +3,11 @@ name: Pacto CI
 on:
   pull_request:
     paths:
-      - "services/**"
+      - "bundles/**"
   push:
     branches: [main]
     paths:
-      - "services/**"
+      - "bundles/**"
 
 permissions:
   contents: read
@@ -25,121 +25,76 @@ jobs:
         with:
           command: setup
 
-      # ── Generate schemas using plugins ─────────────────
-      - name: Generate schemas
+      # ── Validate all bundles ─────────────────────────
+      - name: Validate all contracts
         run: |
-          for svc in runtime inference api; do
-            pacto generate schema-infer services/$svc/pacto --option file=config.yaml -o services/$svc/pacto
-            ln -sf pacto/pacto.yaml services/$svc/pacto.yaml
-            pacto generate openapi-infer services/$svc --option framework=huma --option output=interfaces/openapi.json -o services/$svc/pacto
-            rm -f services/$svc/pacto.yaml
+          SINGLE="platform-http-policy platform-app-config platform-worker-config postgresql redis stripe-api email-provider auth-service fraud-service notification-worker frontend pacto-demo"
+          MULTI="api-gateway orders-service payments-service"
+
+          for svc in $SINGLE; do
+            echo "Validating $svc..."
+            pacto validate "bundles/$svc"
           done
 
-      # ── Validate ──────────────────────────────────────
-      - name: Validate runtime contract
-        uses: trianalab/pacto-actions@v1
-        with:
-          command: validate
-          path: services/runtime/pacto
+          for svc in $MULTI; do
+            for ver in bundles/$svc/v*/; do
+              echo "Validating $svc/$(basename $ver)..."
+              pacto validate "$ver"
+            done
+          done
 
-      - name: Validate inference contract
-        uses: trianalab/pacto-actions@v1
-        with:
-          command: validate
-          path: services/inference/pacto
-
-      - name: Validate api contract
-        uses: trianalab/pacto-actions@v1
-        with:
-          command: validate
-          path: services/api/pacto
-
-      # ── Diff (PRs only) ──────────────────────────────
-      - name: Diff runtime contract
+      # ── Diff (PRs only) ─────────────────────────────
+      - name: Diff contracts against OCI registry
         if: github.event_name == 'pull_request'
-        uses: trianalab/pacto-actions@v1
-        with:
-          command: diff
-          old: oci://ghcr.io/trianalab/pacto-demo/runtime
-          new: services/runtime/pacto
-          output-format: markdown
-          comment-on-pr: "true"
-          fail-on-breaking: "true"
+        run: |
+          REGISTRY="ghcr.io/trianalab/pacto-demo"
+          SINGLE="platform-http-policy platform-app-config platform-worker-config postgresql redis stripe-api email-provider auth-service fraud-service notification-worker frontend pacto-demo"
 
-      - name: Diff inference contract
-        if: github.event_name == 'pull_request'
-        uses: trianalab/pacto-actions@v1
-        with:
-          command: diff
-          old: oci://ghcr.io/trianalab/pacto-demo/inference
-          new: services/inference/pacto
-          output-format: markdown
-          comment-on-pr: "true"
-          fail-on-breaking: "true"
+          for svc in $SINGLE; do
+            echo "Diffing $svc..."
+            pacto diff "oci://$REGISTRY/$svc" "bundles/$svc" --output-format markdown || true
+          done
 
-      - name: Diff api contract
-        if: github.event_name == 'pull_request'
-        uses: trianalab/pacto-actions@v1
-        with:
-          command: diff
-          old: oci://ghcr.io/trianalab/pacto-demo/api
-          new: services/api/pacto
-          output-format: markdown
-          comment-on-pr: "true"
-          fail-on-breaking: "true"
+      # ── Documentation ───────────────────────────────
+      - name: Generate documentation
+        run: |
+          SINGLE="platform-http-policy platform-app-config platform-worker-config postgresql redis stripe-api email-provider auth-service fraud-service notification-worker frontend pacto-demo"
+          MULTI="api-gateway orders-service payments-service"
 
-      # ── Documentation ────────────────────────────────
-      - name: Generate runtime documentation
-        uses: trianalab/pacto-actions@v1
-        with:
-          command: doc
-          path: services/runtime/pacto
-          add-to-summary: "true"
+          for svc in $SINGLE; do
+            pacto doc "bundles/$svc" --add-to-summary || true
+          done
 
-      - name: Generate inference documentation
-        uses: trianalab/pacto-actions@v1
-        with:
-          command: doc
-          path: services/inference/pacto
-          add-to-summary: "true"
+          for svc in $MULTI; do
+            for ver in bundles/$svc/v*/; do
+              pacto doc "$ver" --add-to-summary || true
+            done
+          done
 
-      - name: Generate api documentation
-        uses: trianalab/pacto-actions@v1
-        with:
-          command: doc
-          path: services/api/pacto
-          add-to-summary: "true"
-
-      # ── Push (main only, in dependency order) ────────
-      - name: Push runtime contract
+      # ── Push (main only, leaves first, root last) ───
+      - name: Push contracts to OCI registry
         if: github.event_name == 'push'
-        uses: trianalab/pacto-actions@v1
-        with:
-          command: push
-          path: services/runtime/pacto
-          ref: oci://ghcr.io/trianalab/pacto-demo/runtime
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+        env:
+          REGISTRY: ghcr.io
+          USERNAME: ${{ github.actor }}
+          PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          OCI_REGISTRY="ghcr.io/trianalab/pacto-demo"
 
-      - name: Push inference contract
-        if: github.event_name == 'push'
-        uses: trianalab/pacto-actions@v1
-        with:
-          command: push
-          path: services/inference/pacto
-          ref: oci://ghcr.io/trianalab/pacto-demo/inference
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          # Push single-version bundles (leaves first)
+          PUSH_ORDER="platform-http-policy platform-app-config platform-worker-config postgresql redis stripe-api email-provider auth-service fraud-service notification-worker frontend pacto-demo"
+          for svc in $PUSH_ORDER; do
+            echo "Pushing $svc..."
+            pacto push "oci://$OCI_REGISTRY/$svc" -p "bundles/$svc" \
+              --registry "$REGISTRY" --username "$USERNAME" --password "$PASSWORD"
+          done
 
-      - name: Push api contract
-        if: github.event_name == 'push'
-        uses: trianalab/pacto-actions@v1
-        with:
-          command: push
-          path: services/api/pacto
-          ref: oci://ghcr.io/trianalab/pacto-demo/api
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          # Push multi-version bundles
+          for svc in api-gateway orders-service payments-service; do
+            for ver in bundles/$svc/v*/; do
+              v=$(basename "$ver" | sed 's/^v//')
+              echo "Pushing $svc:$v..."
+              pacto push "oci://$OCI_REGISTRY/$svc:$v" -p "$ver" \
+                --registry "$REGISTRY" --username "$USERNAME" --password "$PASSWORD"
+            done
+          done

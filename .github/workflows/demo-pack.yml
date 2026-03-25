@@ -22,6 +22,9 @@ jobs:
       - name: Pack all contracts
         run: |
           mkdir -p dist
+          SINGLE="platform-http-policy platform-app-config platform-worker-config postgresql redis stripe-api email-provider auth-service fraud-service notification-worker frontend pacto-demo"
+          MULTI="api-gateway orders-service payments-service"
+
           {
             echo "## Contract Bundles"
             echo ""
@@ -29,10 +32,19 @@ jobs:
             echo "|---------|--------|------|"
           } >> "${GITHUB_STEP_SUMMARY}"
 
-          for svc in runtime inference api; do
-            pacto pack "services/${svc}/pacto" -o "dist/${svc}.tar.gz"
+          for svc in $SINGLE; do
+            pacto pack "bundles/$svc" -o "dist/${svc}.tar.gz"
             SIZE=$(du -h "dist/${svc}.tar.gz" | cut -f1 | xargs)
             echo "| \`${svc}\` | \`${svc}.tar.gz\` | ${SIZE} |" >> "${GITHUB_STEP_SUMMARY}"
+          done
+
+          for svc in $MULTI; do
+            for ver in bundles/$svc/v*/; do
+              v=$(basename "$ver" | sed 's/^v//')
+              pacto pack "$ver" -o "dist/${svc}-${v}.tar.gz"
+              SIZE=$(du -h "dist/${svc}-${v}.tar.gz" | cut -f1 | xargs)
+              echo "| \`${svc}:${v}\` | \`${svc}-${v}.tar.gz\` | ${SIZE} |" >> "${GITHUB_STEP_SUMMARY}"
+            done
           done
 
       - name: Upload bundles

@@ -1,0 +1,65 @@
+pactoVersion: "1.0"
+
+service:
+  name: auth-service
+  version: 1.0.0
+  owner: team/identity
+  image:
+    ref: ghcr.io/trianalab/pacto-demo/auth-service:1.0.0
+
+interfaces:
+  - name: grpc
+    type: grpc
+    port: 50051
+    visibility: internal
+    contract: interfaces/auth.proto
+
+configuration:
+  schema: configuration/schema.json
+  values:
+    OTEL_SERVICE_NAME: auth-service
+    JWT_ISSUER: https://auth.platform.internal
+    JWT_EXPIRY_SECONDS: 3600
+    SESSION_STORE: redis
+    BCRYPT_COST: 12
+
+policy:
+  ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
+
+dependencies:
+  - ref: oci://ghcr.io/trianalab/pacto-demo/redis
+    required: true
+    compatibility: "^7.0.0"
+
+runtime:
+  workload: service
+  state:
+    type: hybrid
+    persistence:
+      scope: shared
+      durability: persistent
+    dataCriticality: high
+  lifecycle:
+    upgradeStrategy: rolling
+    gracefulShutdownSeconds: 15
+  health:
+    interface: grpc
+    path: /grpc.health.v1.Health/Check
+
+scaling:
+  min: 2
+  max: 4
+
+metadata:
+  tier: domain
+  category: identity
+  criticality: high
+  summary: Authentication and authorization service managing JWT tokens and sessions
+  language: go
+  repo: github.com/trianalab/pacto-demo/auth-service
+  tags:
+    - authentication
+    - authorization
+    - jwt
+    - sessions
+    - identity

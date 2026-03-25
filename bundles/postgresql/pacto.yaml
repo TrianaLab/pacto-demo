@@ -1,0 +1,37 @@
+pactoVersion: "1.0"
+
+service:
+  name: postgresql
+  version: 16.0.0
+  owner: team/platform
+  image:
+    ref: docker.io/library/postgres:16
+
+runtime:
+  workload: service
+  state:
+    type: stateful
+    persistence:
+      scope: shared
+      durability: persistent
+    dataCriticality: high
+  lifecycle:
+    upgradeStrategy: recreate
+    gracefulShutdownSeconds: 60
+
+scaling:
+  replicas: 1
+
+metadata:
+  tier: infra
+  category: storage
+  criticality: high
+  summary: Primary relational database for transactional data
+  serviceType: infrastructure
+  protocol: postgresql
+  repo: github.com/trianalab/pacto-demo/postgresql
+  tags:
+    - database
+    - relational
+    - persistence
+    - infrastructure
