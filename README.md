@@ -22,7 +22,7 @@ One command. No setup. The CLI pulls the root contract from OCI, resolves the fu
 
 ## Demo
 
-![Demo](assets/pacto.mp4)
+https://github.com/user-attachments/assets/665337df-0ea3-4dc3-9b9b-9eeacc5b1c7e
 
 ---
 
