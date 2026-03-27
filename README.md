@@ -22,7 +22,7 @@ One command. No setup. The CLI pulls the root contract from OCI, resolves the fu
 
 ## Demo
 
-<video src="assets/pacto.mp4" width="100%" autoplay loop muted playsinline></video>
+![Demo](assets/pacto.mp4)
 
 ---
 
