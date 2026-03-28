@@ -5,7 +5,7 @@ service:
   version: 7.2.0
   owner: team/platform
   image:
-    ref: docker.io/library/redis:7.2
+    ref: docker.io/library/redis:7
 
 runtime:
   workload: service
@@ -16,8 +16,8 @@ runtime:
       durability: persistent
     dataCriticality: medium
   lifecycle:
-    upgradeStrategy: rolling
-    gracefulShutdownSeconds: 30
+    upgradeStrategy: ordered
+    gracefulShutdownSeconds: 60
 
 scaling:
   replicas: 1

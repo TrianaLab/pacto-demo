@@ -16,8 +16,8 @@ runtime:
       durability: persistent
     dataCriticality: high
   lifecycle:
-    upgradeStrategy: recreate
-    gracefulShutdownSeconds: 60
+    upgradeStrategy: ordered
+    gracefulShutdownSeconds: 120
 
 scaling:
   replicas: 1

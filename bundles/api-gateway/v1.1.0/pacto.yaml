@@ -5,7 +5,7 @@ service:
   version: 1.1.0
   owner: team/platform
   image:
-    ref: ghcr.io/trianalab/pacto-demo/api-gateway:1.1.0
+    ref: ghcr.io/trianalab/pacto-demo/api-gateway
 
 interfaces:
   - name: http
@@ -48,7 +48,7 @@ runtime:
     dataCriticality: low
   lifecycle:
     upgradeStrategy: rolling
-    gracefulShutdownSeconds: 15
+    gracefulShutdownSeconds: 30
   health:
     interface: http
     path: /health

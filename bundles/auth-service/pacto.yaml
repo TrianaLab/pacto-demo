@@ -5,12 +5,17 @@ service:
   version: 1.0.0
   owner: team/identity
   image:
-    ref: ghcr.io/trianalab/pacto-demo/auth-service:1.0.0
+    ref: ghcr.io/trianalab/pacto-demo/auth-service
 
 interfaces:
+  - name: http
+    type: http
+    port: 8081
+    visibility: internal
+    contract: interfaces/openapi.json
   - name: grpc
     type: grpc
-    port: 50051
+    port: 9091
     visibility: internal
     contract: interfaces/auth.proto
 
@@ -34,17 +39,17 @@ dependencies:
 runtime:
   workload: service
   state:
-    type: hybrid
+    type: stateless
     persistence:
-      scope: shared
-      durability: persistent
+      scope: local
+      durability: ephemeral
     dataCriticality: high
   lifecycle:
     upgradeStrategy: rolling
-    gracefulShutdownSeconds: 15
+    gracefulShutdownSeconds: 30
   health:
-    interface: grpc
-    path: /grpc.health.v1.Health/Check
+    interface: http
+    path: /health
 
 scaling:
   min: 2

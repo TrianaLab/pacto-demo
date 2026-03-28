@@ -5,7 +5,7 @@ service:
   version: 1.0.0
   owner: team/frontend
   image:
-    ref: ghcr.io/trianalab/pacto-demo/frontend:1.0.0
+    ref: ghcr.io/trianalab/pacto-demo/frontend
 
 interfaces:
   - name: http
@@ -40,7 +40,7 @@ runtime:
     dataCriticality: low
   lifecycle:
     upgradeStrategy: rolling
-    gracefulShutdownSeconds: 10
+    gracefulShutdownSeconds: 15
   health:
     interface: http
     path: /health

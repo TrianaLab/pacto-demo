@@ -5,14 +5,14 @@ service:
   version: 1.0.0
   owner: team/risk
   image:
-    ref: ghcr.io/trianalab/pacto-demo/fraud-service:1.0.0
+    ref: ghcr.io/trianalab/pacto-demo/fraud-service
 
 interfaces:
-  - name: grpc
-    type: grpc
-    port: 50052
+  - name: http
+    type: http
+    port: 8084
     visibility: internal
-    contract: interfaces/fraud.proto
+    contract: interfaces/openapi.json
 
 configuration:
   schema: configuration/schema.json
@@ -40,10 +40,10 @@ runtime:
     dataCriticality: low
   lifecycle:
     upgradeStrategy: rolling
-    gracefulShutdownSeconds: 10
+    gracefulShutdownSeconds: 30
   health:
-    interface: grpc
-    path: /grpc.health.v1.Health/Check
+    interface: http
+    path: /health
 
 scaling:
   min: 2
