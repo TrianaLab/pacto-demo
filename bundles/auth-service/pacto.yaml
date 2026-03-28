@@ -12,7 +12,6 @@ interfaces:
     type: http
     port: 8081
     visibility: internal
-    contract: interfaces/openapi.json
   - name: grpc
     type: grpc
     port: 9091

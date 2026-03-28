@@ -12,7 +12,6 @@ interfaces:
     type: http
     port: 8084
     visibility: internal
-    contract: interfaces/openapi.json
 
 configuration:
   schema: configuration/schema.json
