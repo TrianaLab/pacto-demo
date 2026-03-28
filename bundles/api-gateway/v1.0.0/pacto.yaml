@@ -48,9 +48,6 @@ runtime:
   lifecycle:
     upgradeStrategy: rolling
     gracefulShutdownSeconds: 30
-  health:
-    interface: http
-    path: /health
 
 scaling:
   min: 2
