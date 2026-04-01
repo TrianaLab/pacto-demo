@@ -3,7 +3,16 @@ pactoVersion: "1.0"
 service:
   name: frontend
   version: 1.0.0
-  owner: team/frontend
+  owner:
+    team: frontend-team
+    dri: diana.chen
+    contacts:
+      - type: email
+        value: frontend-team@acme.com
+        purpose: escalation
+      - type: chat
+        value: "#frontend-team"
+        purpose: support
   image:
     ref: ghcr.io/trianalab/pacto-demo/frontend
 

@@ -3,7 +3,19 @@ pactoVersion: "1.0"
 service:
   name: auth-service
   version: 1.0.0
-  owner: team/identity
+  owner:
+    team: identity-team
+    dri: erik.nilsson
+    contacts:
+      - type: email
+        value: identity-team@acme.com
+        purpose: escalation
+      - type: chat
+        value: "#identity-team"
+        purpose: support
+      - type: oncall
+        value: identity-team-oncall
+        purpose: oncall
   image:
     ref: ghcr.io/trianalab/pacto-demo/auth-service
 

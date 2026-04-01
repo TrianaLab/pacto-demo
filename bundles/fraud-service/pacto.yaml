@@ -3,7 +3,19 @@ pactoVersion: "1.0"
 service:
   name: fraud-service
   version: 1.0.0
-  owner: team/risk
+  owner:
+    team: payments-team
+    dri: priya.sharma
+    contacts:
+      - type: email
+        value: payments-team@acme.com
+        purpose: escalation
+      - type: chat
+        value: "#payments-team"
+        purpose: support
+      - type: oncall
+        value: payments-oncall
+        purpose: oncall
   image:
     ref: ghcr.io/trianalab/pacto-demo/fraud-service
 
