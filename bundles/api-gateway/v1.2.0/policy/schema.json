@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "API Gateway Policy",
+  "description": "Local policy schema for the API gateway",
+  "type": "object",
+  "properties": {
+    "rateLimit": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": true },
+        "globalRps": { "type": "integer", "default": 1000 },
+        "perClientRps": { "type": "integer", "default": 100 },
+        "burstMultiplier": { "type": "number", "default": 1.5 }
+      },
+      "required": ["enabled", "globalRps", "perClientRps"]
+    },
+    "routing": {
+      "type": "object",
+      "properties": {
+        "retryAttempts": { "type": "integer", "default": 3 },
+        "retryBackoffMs": { "type": "integer", "default": 100 },
+        "circuitBreakerThreshold": { "type": "integer", "default": 5 }
+      }
+    },
+    "cors": {
+      "type": "object",
+      "properties": {
+        "allowedOrigins": { "type": "array", "items": { "type": "string" } },
+        "allowCredentials": { "type": "boolean", "default": true }
+      },
+      "required": ["allowedOrigins"]
+    }
+  },
+  "required": ["rateLimit", "cors"]
+}

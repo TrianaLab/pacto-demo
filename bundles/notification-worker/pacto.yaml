@@ -3,7 +3,16 @@ pactoVersion: "1.0"
 service:
   name: notification-worker
   version: 1.0.0
-  owner: team/platform
+  owner:
+    team: commerce-team
+    dri: fatima.ahmed
+    contacts:
+      - type: email
+        value: commerce-team@acme.com
+        purpose: escalation
+      - type: chat
+        value: "#commerce-team"
+        purpose: support
   image:
     ref: ghcr.io/trianalab/pacto-demo/notification-worker:1.0.0
 

@@ -68,6 +68,7 @@ The `payments-service` evolves through 4 published versions:
 | **v1.1.0** | Adds webhook endpoint, `payment.failed` event, optional `WEBHOOK_SECRET`. |
 | **v1.2.0** | Optional `fraud-service` dep, `risk_score` field, `FRAUD_CHECK_ENABLED`. |
 | **v2.0.0** | **Breaking.** Removes `/charges`, adds `/payment-intents`, renames config, `fraud-service` required. |
+| **v2.1.0** | Adds structured ownership metadata (team, DRI, contacts). |
 
 Diff v1.2.0 against v2.0.0:
 

@@ -3,7 +3,19 @@ pactoVersion: "1.0"
 service:
   name: postgresql
   version: 16.0.0
-  owner: team/platform
+  owner:
+    team: infra-data
+    dri: carlos.silva
+    contacts:
+      - type: email
+        value: infra-data@acme.com
+        purpose: escalation
+      - type: chat
+        value: "#infra-data"
+        purpose: support
+      - type: oncall
+        value: infra-data-oncall
+        purpose: oncall
   image:
     ref: docker.io/library/postgres:16
 
