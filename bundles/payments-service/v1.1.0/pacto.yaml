@@ -19,6 +19,8 @@ interfaces:
     contract: interfaces/events.json
 
 configuration:
+  remotes:
+    - ref: oci://ghcr.io/trianalab/pacto-demo/platform-app-config
   schema: configuration/schema.json
   values:
     LOG_LEVEL: info

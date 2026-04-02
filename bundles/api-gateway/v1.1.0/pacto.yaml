@@ -15,6 +15,8 @@ interfaces:
     contract: interfaces/openapi.json
 
 configuration:
+  remotes:
+    - ref: oci://ghcr.io/trianalab/pacto-demo/platform-app-config
   schema: configuration/schema.json
   values:
     OTEL_SERVICE_NAME: api-gateway
