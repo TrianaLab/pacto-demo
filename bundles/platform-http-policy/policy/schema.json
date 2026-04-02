@@ -1,42 +1,29 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Platform HTTP Policy",
+  "description": "Enforces platform standards: structured ownership, metadata classification, and runtime declaration",
   "type": "object",
   "properties": {
-    "rateLimit": {
+    "service": {
       "type": "object",
       "properties": {
-        "enabled": { "type": "boolean", "default": true },
-        "requestsPerSecond": { "type": "integer", "default": 100 },
-        "burstSize": { "type": "integer", "default": 50 }
+        "owner": {
+          "type": "object",
+          "properties": {
+            "team": { "type": "string", "minLength": 1 }
+          },
+          "required": ["team"]
+        }
       },
-      "required": ["enabled", "requestsPerSecond"]
+      "required": ["owner"]
     },
-    "cors": {
+    "metadata": {
       "type": "object",
-      "properties": {
-        "allowedOrigins": { "type": "array", "items": { "type": "string" } },
-        "allowedMethods": { "type": "array", "items": { "type": "string" } },
-        "maxAge": { "type": "integer", "default": 3600 }
-      },
-      "required": ["allowedOrigins"]
+      "required": ["tier", "criticality"]
     },
-    "authentication": {
-      "type": "object",
-      "properties": {
-        "required": { "type": "boolean", "default": true },
-        "type": { "type": "string", "enum": ["jwt", "api-key", "oauth2"] },
-        "jwksUrl": { "type": "string", "format": "uri" }
-      },
-      "required": ["required", "type"]
-    },
-    "tls": {
-      "type": "object",
-      "properties": {
-        "enabled": { "type": "boolean", "default": true },
-        "minVersion": { "type": "string", "default": "1.2" }
-      }
+    "runtime": {
+      "type": "object"
     }
   },
-  "required": ["rateLimit", "authentication"]
+  "required": ["service", "metadata", "runtime"]
 }
