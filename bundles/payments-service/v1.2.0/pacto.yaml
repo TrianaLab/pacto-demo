@@ -19,14 +19,18 @@ interfaces:
     contract: interfaces/events.json
 
 configuration:
-  schema: configuration/schema.json
-  values:
-    LOG_LEVEL: info
-    STRIPE_API_KEY: "${STRIPE_API_KEY}"
-    PAYMENTS_DB_URL: postgresql://postgres:5432/payments
-    ENABLE_REFUNDS: true
-    WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET}"
-    FRAUD_CHECK_ENABLED: false
+  configs:
+    - name: platform
+      ref: oci://ghcr.io/trianalab/pacto-demo/platform-app-config
+    - name: app
+      schema: configuration/schema.json
+      values:
+        LOG_LEVEL: info
+        STRIPE_API_KEY: "${STRIPE_API_KEY}"
+        PAYMENTS_DB_URL: postgresql://postgres:5432/payments
+        ENABLE_REFUNDS: true
+        WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET}"
+        FRAUD_CHECK_ENABLED: false
 
 policies:
   - ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy

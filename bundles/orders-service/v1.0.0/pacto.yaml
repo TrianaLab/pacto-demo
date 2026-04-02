@@ -19,11 +19,15 @@ interfaces:
     contract: interfaces/events.json
 
 configuration:
-  schema: configuration/schema.json
-  values:
-    OTEL_SERVICE_NAME: orders-service
-    DATABASE_URL: postgresql://postgres:5432/orders
-    PAYMENTS_SERVICE_URL: http://payments-service:8083
+  configs:
+    - name: platform
+      ref: oci://ghcr.io/trianalab/pacto-demo/platform-app-config
+    - name: app
+      schema: configuration/schema.json
+      values:
+        OTEL_SERVICE_NAME: orders-service
+        DATABASE_URL: postgresql://postgres:5432/orders
+        PAYMENTS_SERVICE_URL: http://payments-service:8083
 
 policies:
   - ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy

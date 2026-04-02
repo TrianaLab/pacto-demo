@@ -31,13 +31,17 @@ interfaces:
     contract: interfaces/auth.proto
 
 configuration:
-  schema: configuration/schema.json
-  values:
-    OTEL_SERVICE_NAME: auth-service
-    JWT_ISSUER: https://auth.platform.internal
-    JWT_EXPIRY_SECONDS: 3600
-    SESSION_STORE: redis
-    BCRYPT_COST: 12
+  configs:
+    - name: platform
+      ref: oci://ghcr.io/trianalab/pacto-demo/platform-app-config
+    - name: app
+      schema: configuration/schema.json
+      values:
+        OTEL_SERVICE_NAME: auth-service
+        JWT_ISSUER: https://auth.platform.internal
+        JWT_EXPIRY_SECONDS: 3600
+        SESSION_STORE: redis
+        BCRYPT_COST: 12
 
 policies:
   - ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy

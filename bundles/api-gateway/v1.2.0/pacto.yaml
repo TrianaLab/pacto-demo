@@ -27,14 +27,18 @@ interfaces:
     contract: interfaces/openapi.json
 
 configuration:
-  schema: configuration/schema.json
-  values:
-    OTEL_SERVICE_NAME: api-gateway
-    AUTH_SERVICE_URL: auth-service:50051
-    ORDERS_SERVICE_URL: http://orders-service:8082
-    PAYMENTS_SERVICE_URL: http://payments-service:8083
-    REQUEST_TIMEOUT_SECONDS: 30
-    ENABLE_WEBSOCKETS: true
+  configs:
+    - name: platform
+      ref: oci://ghcr.io/trianalab/pacto-demo/platform-app-config
+    - name: app
+      schema: configuration/schema.json
+      values:
+        OTEL_SERVICE_NAME: api-gateway
+        AUTH_SERVICE_URL: auth-service:50051
+        ORDERS_SERVICE_URL: http://orders-service:8082
+        PAYMENTS_SERVICE_URL: http://payments-service:8083
+        REQUEST_TIMEOUT_SECONDS: 30
+        ENABLE_WEBSOCKETS: true
 
 policies:
   - schema: policy/schema.json
