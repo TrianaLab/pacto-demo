@@ -17,9 +17,6 @@ service:
         value: platform-foundations-oncall
         purpose: oncall
 
-policy:
-  schema: policy/schema.json
-
 metadata:
   tier: platform
   category: policy

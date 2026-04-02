@@ -39,8 +39,8 @@ configuration:
     WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET}"
     FRAUD_CHECK_ENABLED: true
 
-policy:
-  ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
+policies:
+  - ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
 
 dependencies:
   - ref: oci://ghcr.io/trianalab/pacto-demo/postgresql

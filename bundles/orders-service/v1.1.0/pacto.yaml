@@ -26,8 +26,8 @@ configuration:
     PAYMENTS_SERVICE_URL: http://payments-service:8083
     ENABLE_ORDER_TRACKING: true
 
-policy:
-  ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
+policies:
+  - ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
 
 dependencies:
   - ref: oci://ghcr.io/trianalab/pacto-demo/postgresql

@@ -31,8 +31,8 @@ configuration:
     EMAIL_FROM: noreply@platform.example.com
     SENDGRID_API_KEY: "${SENDGRID_API_KEY}"
 
-policy:
-  ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
+policies:
+  - ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
 
 dependencies:
   - ref: oci://ghcr.io/trianalab/pacto-demo/email-provider

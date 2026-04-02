@@ -1,35 +1,32 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "API Gateway Policy",
-  "description": "Local policy schema for the API gateway",
+  "description": "Enforces gateway-specific standards: public HTTP interface, scaling bounds, and dependency declarations",
   "type": "object",
   "properties": {
-    "rateLimit": {
-      "type": "object",
-      "properties": {
-        "enabled": { "type": "boolean", "default": true },
-        "globalRps": { "type": "integer", "default": 1000 },
-        "perClientRps": { "type": "integer", "default": 100 },
-        "burstMultiplier": { "type": "number", "default": 1.5 }
-      },
-      "required": ["enabled", "globalRps", "perClientRps"]
-    },
-    "routing": {
-      "type": "object",
-      "properties": {
-        "retryAttempts": { "type": "integer", "default": 3 },
-        "retryBackoffMs": { "type": "integer", "default": 100 },
-        "circuitBreakerThreshold": { "type": "integer", "default": 5 }
+    "interfaces": {
+      "type": "array",
+      "minItems": 1,
+      "contains": {
+        "type": "object",
+        "properties": {
+          "type": { "const": "http" },
+          "visibility": { "const": "public" }
+        },
+        "required": ["type", "visibility"]
       }
     },
-    "cors": {
+    "scaling": {
       "type": "object",
       "properties": {
-        "allowedOrigins": { "type": "array", "items": { "type": "string" } },
-        "allowCredentials": { "type": "boolean", "default": true }
+        "min": { "type": "integer", "minimum": 2 }
       },
-      "required": ["allowedOrigins"]
+      "required": ["min"]
+    },
+    "dependencies": {
+      "type": "array",
+      "minItems": 1
     }
   },
-  "required": ["rateLimit", "cors"]
+  "required": ["interfaces", "scaling", "dependencies"]
 }
