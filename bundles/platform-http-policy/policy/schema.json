@@ -8,11 +8,16 @@
       "type": "object",
       "properties": {
         "owner": {
-          "type": "object",
-          "properties": {
-            "team": { "type": "string", "minLength": 1 }
-          },
-          "required": ["team"]
+          "oneOf": [
+            { "type": "string", "minLength": 1 },
+            {
+              "type": "object",
+              "properties": {
+                "team": { "type": "string", "minLength": 1 }
+              },
+              "required": ["team"]
+            }
+          ]
         }
       },
       "required": ["owner"]
