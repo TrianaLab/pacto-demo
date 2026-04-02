@@ -24,14 +24,16 @@ interfaces:
     contract: interfaces/openapi.json
 
 configuration:
-  remotes:
-    - ref: oci://ghcr.io/trianalab/pacto-demo/platform-app-config
-  schema: configuration/schema.json
-  values:
-    OTEL_SERVICE_NAME: frontend
-    API_GATEWAY_URL: http://api-gateway:8080
-    NEXT_PUBLIC_APP_NAME: "Commerce Platform"
-    NODE_ENV: production
+  configs:
+    - name: platform
+      ref: oci://ghcr.io/trianalab/pacto-demo/platform-app-config
+    - name: app
+      schema: configuration/schema.json
+      values:
+        OTEL_SERVICE_NAME: frontend
+        API_GATEWAY_URL: http://api-gateway:8080
+        NEXT_PUBLIC_APP_NAME: "Commerce Platform"
+        NODE_ENV: production
 
 policies:
   - ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
