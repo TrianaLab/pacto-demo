@@ -27,8 +27,8 @@ configuration:
     ENABLE_REFUNDS: true
     WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET}"
 
-policy:
-  ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
+policies:
+  - ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
 
 dependencies:
   - ref: oci://ghcr.io/trianalab/pacto-demo/postgresql

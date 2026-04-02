@@ -26,8 +26,8 @@ configuration:
     PAYMENTS_DB_URL: postgresql://postgres:5432/payments
     ENABLE_REFUNDS: true
 
-policy:
-  ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
+policies:
+  - ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
 
 dependencies:
   - ref: oci://ghcr.io/trianalab/pacto-demo/postgresql

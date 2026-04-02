@@ -31,8 +31,8 @@ configuration:
     NEXT_PUBLIC_APP_NAME: "Commerce Platform"
     NODE_ENV: production
 
-policy:
-  ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
+policies:
+  - ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
 
 dependencies:
   - ref: oci://ghcr.io/trianalab/pacto-demo/api-gateway

@@ -25,8 +25,8 @@ configuration:
     DATABASE_URL: postgresql://postgres:5432/orders
     PAYMENTS_SERVICE_URL: http://payments-service:8083
 
-policy:
-  ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
+policies:
+  - ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
 
 dependencies:
   - ref: oci://ghcr.io/trianalab/pacto-demo/postgresql

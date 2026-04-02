@@ -36,8 +36,8 @@ configuration:
     REQUEST_TIMEOUT_SECONDS: 30
     ENABLE_WEBSOCKETS: true
 
-policy:
-  schema: policy/schema.json
+policies:
+  - schema: policy/schema.json
 
 dependencies:
   - ref: oci://ghcr.io/trianalab/pacto-demo/auth-service

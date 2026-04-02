@@ -33,8 +33,8 @@ configuration:
     MODEL_VERSION: v2.3.1
     REDIS_URL: redis://redis:6379/2
 
-policy:
-  ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
+policies:
+  - ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
 
 dependencies:
   - ref: oci://ghcr.io/trianalab/pacto-demo/redis
