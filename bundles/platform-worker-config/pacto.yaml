@@ -17,8 +17,9 @@ service:
         value: platform-foundations-oncall
         purpose: oncall
 
-configuration:
-  schema: configuration/schema.json
+configurations:
+  - name: default
+    schema: configuration/schema.json
 
 metadata:
   tier: platform

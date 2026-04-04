@@ -30,29 +30,32 @@ interfaces:
     visibility: internal
     contract: interfaces/events.json
 
-configuration:
-  configs:
-    - name: platform
-      ref: oci://ghcr.io/trianalab/pacto-demo/platform-app-config
-    - name: app
-      schema: configuration/schema.json
-      values:
-        OTEL_SERVICE_NAME: orders-service
-        DATABASE_URL: postgresql://postgres:5432/orders
-        PAYMENTS_SERVICE_URL: http://payments-service:8083
-        ENABLE_ORDER_TRACKING: true
+configurations:
+  - name: platform
+    ref: oci://ghcr.io/trianalab/pacto-demo/platform-app-config
+  - name: app
+    schema: configuration/schema.json
+    values:
+      OTEL_SERVICE_NAME: orders-service
+      DATABASE_URL: postgresql://postgres:5432/orders
+      PAYMENTS_SERVICE_URL: http://payments-service:8083
+      ENABLE_ORDER_TRACKING: true
 
 policies:
-  - ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
+  - name: http-security
+    ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
 
 dependencies:
-  - ref: oci://ghcr.io/trianalab/pacto-demo/postgresql
+  - name: postgresql
+    ref: oci://ghcr.io/trianalab/pacto-demo/postgresql
     required: true
     compatibility: "^16.0.0"
-  - ref: oci://ghcr.io/trianalab/pacto-demo/payments-service
+  - name: payments-service
+    ref: oci://ghcr.io/trianalab/pacto-demo/payments-service
     required: true
     compatibility: "^1.0.0"
-  - ref: oci://ghcr.io/trianalab/pacto-demo/notification-worker
+  - name: notification-worker
+    ref: oci://ghcr.io/trianalab/pacto-demo/notification-worker
     required: true
     compatibility: "^1.0.0"
 
