@@ -25,23 +25,24 @@ interfaces:
     port: 8084
     visibility: internal
 
-configuration:
-  configs:
-    - name: platform
-      ref: oci://ghcr.io/trianalab/pacto-demo/platform-app-config
-    - name: app
-      schema: configuration/schema.json
-      values:
-        LOG_LEVEL: info
-        RISK_THRESHOLD: 0.7
-        MODEL_VERSION: v2.3.1
-        REDIS_URL: redis://redis:6379/2
+configurations:
+  - name: platform
+    ref: oci://ghcr.io/trianalab/pacto-demo/platform-app-config
+  - name: app
+    schema: configuration/schema.json
+    values:
+      LOG_LEVEL: info
+      RISK_THRESHOLD: 0.7
+      MODEL_VERSION: v2.3.1
+      REDIS_URL: redis://redis:6379/2
 
 policies:
-  - ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
+  - name: http-security
+    ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
 
 dependencies:
-  - ref: oci://ghcr.io/trianalab/pacto-demo/redis
+  - name: redis
+    ref: oci://ghcr.io/trianalab/pacto-demo/redis
     required: true
     compatibility: "^7.0.0"
 

@@ -15,7 +15,8 @@ service:
         purpose: support
 
 dependencies:
-  - ref: oci://ghcr.io/trianalab/pacto-demo/frontend
+  - name: frontend
+    ref: oci://ghcr.io/trianalab/pacto-demo/frontend
     required: true
     compatibility: "^1.0.0"
 

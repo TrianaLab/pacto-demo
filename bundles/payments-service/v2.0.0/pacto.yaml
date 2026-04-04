@@ -18,30 +18,33 @@ interfaces:
     visibility: internal
     contract: interfaces/events.json
 
-configuration:
-  configs:
-    - name: platform
-      ref: oci://ghcr.io/trianalab/pacto-demo/platform-app-config
-    - name: app
-      schema: configuration/schema.json
-      values:
-        LOG_LEVEL: info
-        STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY}"
-        PAYMENTS_DB_URL: postgresql://postgres:5432/payments
-        WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET}"
-        FRAUD_CHECK_ENABLED: true
+configurations:
+  - name: platform
+    ref: oci://ghcr.io/trianalab/pacto-demo/platform-app-config
+  - name: app
+    schema: configuration/schema.json
+    values:
+      LOG_LEVEL: info
+      STRIPE_SECRET_KEY: "${STRIPE_SECRET_KEY}"
+      PAYMENTS_DB_URL: postgresql://postgres:5432/payments
+      WEBHOOK_SECRET: "${STRIPE_WEBHOOK_SECRET}"
+      FRAUD_CHECK_ENABLED: true
 
 policies:
-  - ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
+  - name: http-security
+    ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
 
 dependencies:
-  - ref: oci://ghcr.io/trianalab/pacto-demo/postgresql
+  - name: postgresql
+    ref: oci://ghcr.io/trianalab/pacto-demo/postgresql
     required: true
     compatibility: "^16.0.0"
-  - ref: oci://ghcr.io/trianalab/pacto-demo/stripe-api
+  - name: stripe-api
+    ref: oci://ghcr.io/trianalab/pacto-demo/stripe-api
     required: true
     compatibility: "^2024.01.01"
-  - ref: oci://ghcr.io/trianalab/pacto-demo/fraud-service
+  - name: fraud-service
+    ref: oci://ghcr.io/trianalab/pacto-demo/fraud-service
     required: true
     compatibility: "^1.0.0"
 

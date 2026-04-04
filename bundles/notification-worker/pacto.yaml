@@ -22,24 +22,25 @@ interfaces:
     visibility: internal
     contract: interfaces/events.json
 
-configuration:
-  configs:
-    - name: platform
-      ref: oci://ghcr.io/trianalab/pacto-demo/platform-app-config
-    - name: app
-      schema: configuration/schema.json
-      values:
-        OTEL_SERVICE_NAME: notification-worker
-        WORKER_CONCURRENCY: 3
-        EMAIL_PROVIDER_URL: https://api.sendgrid.com
-        EMAIL_FROM: noreply@platform.example.com
-        SENDGRID_API_KEY: "${SENDGRID_API_KEY}"
+configurations:
+  - name: platform
+    ref: oci://ghcr.io/trianalab/pacto-demo/platform-worker-config
+  - name: app
+    schema: configuration/schema.json
+    values:
+      OTEL_SERVICE_NAME: notification-worker
+      WORKER_CONCURRENCY: 3
+      EMAIL_PROVIDER_URL: https://api.sendgrid.com
+      EMAIL_FROM: noreply@platform.example.com
+      SENDGRID_API_KEY: "${SENDGRID_API_KEY}"
 
 policies:
-  - ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
+  - name: http-security
+    ref: oci://ghcr.io/trianalab/pacto-demo/platform-http-policy
 
 dependencies:
-  - ref: oci://ghcr.io/trianalab/pacto-demo/email-provider
+  - name: email-provider
+    ref: oci://ghcr.io/trianalab/pacto-demo/email-provider
     required: true
     compatibility: "^1.0.0"
 

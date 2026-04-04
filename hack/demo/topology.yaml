@@ -34,12 +34,15 @@ versions:
     - "1.1.0"
     - "1.2.0"
     - "2.0.0"
+    - "2.1.0"
   api-gateway:
     - "1.0.0"
     - "1.1.0"
+    - "1.2.0"
   orders-service:
     - "1.0.0"
     - "1.1.0"
+    - "1.2.0"
   frontend:
     - "1.0.0"
   auth-service:
